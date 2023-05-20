@@ -103,22 +103,18 @@ async function fetchPlaylists(token: string): Promise<SimplifiedPlaylist[]> {
             method: "GET", headers: { Authorization: `Bearer ${token}` }
         });
         rj = await result.json();
-        // console.log(rj.items);
         if (rj.items.length === 0) {
-            // console.log(playlists);
             return playlists;
         } else {
             playlists = playlists.concat(rj.items);
             offset += limit;
-            // console.log(`offset: ${offset}`)
         }
     } 
 }
 
 function populateUIplaylists(playlists: SimplifiedPlaylist[]) {
-    console.log(playlists);
     const plList = document.getElementById("playlistList");
     for (let pl of playlists) {
-        plList.innerHTML += `<li>${pl.name}</li>`;
+        plList!.innerHTML += `<li>${pl.name}</li>`;
     }
 }
