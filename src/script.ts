@@ -8,8 +8,8 @@ if (!code) {
     const accessToken = await getAccessToken(clientId, code);
     const profile = await fetchProfile(accessToken);
     const playlists = await fetchPlaylists(accessToken);
-    console.log(playlists)
-    populateUI(profile);
+    populateUIprofile(profile);
+    populateUIplaylists(playlists);
 }
 
 export async function redirectToAuthCodeFlow(clientId: string) {
@@ -76,7 +76,7 @@ async function fetchProfile(token: string): Promise<UserProfile> {
     return await result.json();
 }
 
-function populateUI(profile: UserProfile) {
+function populateUIprofile(profile: UserProfile) {
     document.getElementById("displayName")!.innerText = profile.display_name;
     if (profile.images[0]) {
         const profileImage = new Image(200, 200);
@@ -93,9 +93,16 @@ function populateUI(profile: UserProfile) {
 }
 
 async function fetchPlaylists(token: string): Promise<UserPlaylists> {
-    const result = await fetch("https://api.spotify.com/v1/me/playlists", {
+    const result = await fetch("https://api.spotify.com/v1/me/playlists?limit=10", {
         method: "GET", headers: { Authorization: `Bearer ${token}` }
     });
 
     return await result.json();
+}
+
+function populateUIplaylists(playlists: UserPlaylists) {
+    let plList = document.getElementById("playlistList");
+    for (let pl of playlists.items) {
+        plList.innerHTML += `<li>${pl.name}</li>`;
+    }
 }
