@@ -69,7 +69,7 @@ export async function getAccessToken(clientId: string, code: string): Promise<st
 }
 
 async function fetchProfile(token: string): Promise<UserProfile> {
-    let result = await fetch("https://api.spotify.com/v1/me", {
+    const result = await fetch("https://api.spotify.com/v1/me", {
         method: "GET", headers: { Authorization: `Bearer ${token}` }
     });
 
@@ -92,17 +92,33 @@ function populateUIprofile(profile: UserProfile) {
     document.getElementById("imgUrl")!.innerText = profile.images[0]?.url ?? '(no profile image)';
 }
 
-async function fetchPlaylists(token: string): Promise<UserPlaylists> {
-    const result = await fetch("https://api.spotify.com/v1/me/playlists?limit=10", {
-        method: "GET", headers: { Authorization: `Bearer ${token}` }
-    });
-
-    return await result.json();
+async function fetchPlaylists(token: string): Promise<SimplifiedPlaylist[]> {
+    const limit = 10;
+    let playlists: SimplifiedPlaylist[] = [];
+    let offset = 0;
+    let result;
+    let rj;
+    while (true) {
+        result = await fetch(`https://api.spotify.com/v1/me/playlists?limit=${limit}&offset=${offset}`, {
+            method: "GET", headers: { Authorization: `Bearer ${token}` }
+        });
+        rj = await result.json();
+        // console.log(rj.items);
+        if (rj.items.length === 0) {
+            // console.log(playlists);
+            return playlists;
+        } else {
+            playlists = playlists.concat(rj.items);
+            offset += limit;
+            // console.log(`offset: ${offset}`)
+        }
+    } 
 }
 
-function populateUIplaylists(playlists: UserPlaylists) {
-    let plList = document.getElementById("playlistList");
-    for (let pl of playlists.items) {
+function populateUIplaylists(playlists: SimplifiedPlaylist[]) {
+    console.log(playlists);
+    const plList = document.getElementById("playlistList");
+    for (let pl of playlists) {
         plList.innerHTML += `<li>${pl.name}</li>`;
     }
 }
