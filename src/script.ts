@@ -8,8 +8,10 @@ if (!code) {
     const accessToken = await getAccessToken(clientId, code);
     const profile = await fetchProfile(accessToken);
     const playlists = await fetchPlaylists(accessToken);
+    const tracks = await fetchTracks(accessToken, playlists[0])
     populateUIprofile(profile);
     populateUIplaylists(playlists);
+    populateUItracks(tracks);
 }
 
 export async function redirectToAuthCodeFlow(clientId: string) {
@@ -116,5 +118,37 @@ function populateUIplaylists(playlists: SimplifiedPlaylist[]) {
     const plList = document.getElementById("playlistList");
     for (let pl of playlists) {
         plList!.innerHTML += `<li>${pl.name}</li>`;
+    }
+}
+
+async function fetchTracks(token: string, pl: SimplifiedPlaylist): Promise<string[]> {
+    let trackNames: string[] = []
+    let offset = 0;
+    let result;
+    let rj;
+    while (true) {
+        result = await fetch(`https://api.spotify.com/v1/playlists/${pl.id}/tracks?offset=${offset}`, {
+            method: "GET", 
+            headers: { Authorization: `Bearer ${token}`},
+        });
+        rj = await result.json();
+        if (rj.items.length === 0 ) {
+            return trackNames;
+        } else {
+            for (let item of rj.items) {
+                trackNames.push(item.track.name);
+            }
+            offset += rj.items.length;
+        }
+        if (offset >= rj.total) {
+            return trackNames;
+        }
+    } 
+}
+
+function populateUItracks(tracks: string[]) {
+    const trackList = document.getElementById("trackList");
+    for (let track of tracks) {
+        trackList!.innerHTML += `<li>${track}</li>`;
     }
 }
