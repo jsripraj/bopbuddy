@@ -114,20 +114,19 @@ async function fetchPlaylists(token: string): Promise<SimplifiedPlaylist[]> {
 
 function populateUIplaylists(token: string, playlists: SimplifiedPlaylist[]) {
     const plList = document.getElementById("playlistList");
-    for (let pl of playlists) {
+    for (const pl of playlists) {
         plList!.innerHTML += `<li id=${"PLID_" + pl.id}>${pl.name}</li>`;
         plList!.innerHTML += `<ul id=${"PLID_" + pl.id + "_tracks"}></ul>`;
-        playlistAddClickListener(token, pl);
     }
-}
-
-function playlistAddClickListener(token: string, pl: SimplifiedPlaylist): void {
-    const element = document.getElementById(`PLID_${pl.id}`);
-    element?.addEventListener("click", async function () {
-        console.log(pl.name);
-        await fetchTracks(token, pl);
-        populateUItracks(pl); 
-    });
+    let element;
+    for (const pl of playlists) {
+        element = document.getElementById(`PLID_${pl.id}`);
+        element?.addEventListener("click", async function () {
+            console.log(pl.name + " click event");
+            await fetchTracks(token, pl);
+            populateUItracks(pl); 
+        });
+    }
 }
 
 async function fetchTracks(token: string, pl: SimplifiedPlaylist): Promise<void> {
