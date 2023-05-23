@@ -43,10 +43,18 @@ interface SimplifiedPlaylist {
     owner: UserProfile;
     public: boolean;
     snapshot_id: string;
-    tracks: {
-        href: string,
-        total: number
-    };
+    tracks: Track[];
     type: string;
     uri: string;
+}
+
+interface Track {
+    album: string;
+    artists: string[];
+    duration_ms: number;
+    explicit: boolean;
+    id: string;
+    name: string;
+    popularity: number;
+    type: string;
 }

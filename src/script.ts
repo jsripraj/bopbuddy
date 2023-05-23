@@ -8,10 +8,8 @@ if (!code) {
     const accessToken = await getAccessToken(clientId, code);
     const profile = await fetchProfile(accessToken);
     const playlists = await fetchPlaylists(accessToken);
-    const tracks = await fetchTracks(accessToken, playlists[0])
     populateUIprofile(profile);
-    populateUIplaylists(playlists);
-    populateUItracks(tracks);
+    populateUIplaylists(accessToken, playlists);
 }
 
 export async function redirectToAuthCodeFlow(clientId: string) {
@@ -114,15 +112,27 @@ async function fetchPlaylists(token: string): Promise<SimplifiedPlaylist[]> {
     } 
 }
 
-function populateUIplaylists(playlists: SimplifiedPlaylist[]) {
+function populateUIplaylists(token: string, playlists: SimplifiedPlaylist[]) {
     const plList = document.getElementById("playlistList");
     for (let pl of playlists) {
-        plList!.innerHTML += `<li>${pl.name}</li>`;
+        plList!.innerHTML += `<li id=${"PLID_" + pl.id}>${pl.name}</li>`;
+        plList!.innerHTML += `<ul id=${"PLID_" + pl.id + "_tracks"}></ul>`;
+        playlistAddClickListener(token, pl);
     }
 }
 
-async function fetchTracks(token: string, pl: SimplifiedPlaylist): Promise<string[]> {
-    let trackNames: string[] = []
+function playlistAddClickListener(token: string, pl: SimplifiedPlaylist): void {
+    const element = document.getElementById(`PLID_${pl.id}`);
+    element?.addEventListener("click", async function () {
+        console.log(pl.name);
+        await fetchTracks(token, pl);
+        populateUItracks(pl); 
+    });
+}
+
+async function fetchTracks(token: string, pl: SimplifiedPlaylist): Promise<void> {
+    console.log("called fetchTracks")
+    pl.tracks = [];
     let offset = 0;
     let result;
     let rj;
@@ -133,22 +143,24 @@ async function fetchTracks(token: string, pl: SimplifiedPlaylist): Promise<strin
         });
         rj = await result.json();
         if (rj.items.length === 0 ) {
-            return trackNames;
+            return;
         } else {
             for (let item of rj.items) {
-                trackNames.push(item.track.name);
+                pl.tracks.push(item.track);
             }
             offset += rj.items.length;
         }
         if (offset >= rj.total) {
-            return trackNames;
+            return;
         }
     } 
 }
 
-function populateUItracks(tracks: string[]) {
-    const trackList = document.getElementById("trackList");
-    for (let track of tracks) {
-        trackList!.innerHTML += `<li>${track}</li>`;
+function populateUItracks(pl: SimplifiedPlaylist): void {
+    console.log('called populateUItracks');
+    const plList = document.getElementById(`PLID_${pl.id}_tracks`);
+    for (const track of pl.tracks) {
+        plList!.innerHTML += `<li>${track.name}</li>`;
     }
+    return;
 }
