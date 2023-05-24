@@ -113,7 +113,7 @@ async function fetchPlaylists(token: string): Promise<SimplifiedPlaylist[]> {
     } 
 }
 
-function populateUIplaylists(token: string, playlists: SimplifiedPlaylist[]) {
+function populateUIplaylists(token: string, playlists: SimplifiedPlaylist[]): void {
     const plList = document.getElementById("playlistList");
     for (let i = 0; i < playlists.length; i++) {
         plList!.innerHTML += `<li id=PL${i}>${playlists[i].name}</li>`;
@@ -125,13 +125,26 @@ function populateUIplaylists(token: string, playlists: SimplifiedPlaylist[]) {
         element = document.getElementById(`PL${i}`);
         element?.addEventListener("click", async function () {
             console.log(playlists[i].name + " click event");
-            if (!(playlists[i].expanded)) {
+            if (playlists[i].expanded) {
+                toggleShowPlaylist(i);
+            } else {
                 await fetchTracks(token, playlists[i]);
                 populateUItracks(playlists[i]); 
                 playlists[i].expanded = true;
             }
         });
     }
+    return;
+}
+
+function toggleShowPlaylist(i: number): void {
+    const ul = document.getElementById(`PL${i}TL`);
+    if (ul?.hasAttribute('hidden')) {
+        ul.removeAttribute('hidden');
+    } else {
+        ul?.setAttribute('hidden', '');
+    }
+    return;
 }
 
 async function fetchTracks(token: string, pl: SimplifiedPlaylist): Promise<void> {
@@ -196,10 +209,6 @@ async function transferSongs(token: string, playlists: SimplifiedPlaylist[]): Pr
         const found = track.id.match(/PL(\d+)TR(\d+)/); // track id is of form 'PL#TR#'
         const p = Number(found[1]);
         const t = Number(found[2]);
-        console.log(`p = ${p}, t = ${t}`);
-        console.log(`playlists[p] = ${playlists[p]}`);
-        console.log(`playlists[p].tracks[t] = ${playlists[p].tracks[t]}`);
-        console.log(`uri = ${playlists[p].tracks[t].uri}`)
         // currently, user being able to select destination playlist is unimplemented
         // using playlist[0] as test destination
         await fetch(`https://api.spotify.com/v1/playlists/${playlists[0].id}/tracks`, {
