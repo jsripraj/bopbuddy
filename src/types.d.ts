@@ -46,6 +46,7 @@ interface SimplifiedPlaylist {
     tracks: Track[];
     type: string;
     uri: string;
+    expanded: boolean;
 }
 
 interface Track {
@@ -57,4 +58,5 @@ interface Track {
     name: string;
     popularity: number;
     type: string;
+    uri: string;
 }

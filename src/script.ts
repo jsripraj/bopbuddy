@@ -10,6 +10,7 @@ if (!code) {
     const playlists = await fetchPlaylists(accessToken);
     populateUIprofile(profile);
     populateUIplaylists(accessToken, playlists);
+    setUpButton(accessToken, playlists);
 }
 
 export async function redirectToAuthCodeFlow(clientId: string) {
@@ -22,7 +23,7 @@ export async function redirectToAuthCodeFlow(clientId: string) {
     params.append("client_id", clientId);
     params.append("response_type", "code");
     params.append("redirect_uri", "http://localhost:5173/callback");
-    params.append("scope", "user-read-private user-read-email");
+    params.append("scope", "user-read-private user-read-email playlist-modify-private playlist-modify-public");
     params.append("code_challenge_method", "S256");
     params.append("code_challenge", challenge);
 
@@ -123,14 +124,17 @@ function populateUIplaylists(token: string, playlists: SimplifiedPlaylist[]) {
         element = document.getElementById(`PLID_${pl.id}`);
         element?.addEventListener("click", async function () {
             console.log(pl.name + " click event");
-            await fetchTracks(token, pl);
-            populateUItracks(pl); 
+            if (!(pl.expanded)) {
+                await fetchTracks(token, pl);
+                populateUItracks(pl); 
+                pl.expanded = true;
+            }
         });
     }
 }
 
 async function fetchTracks(token: string, pl: SimplifiedPlaylist): Promise<void> {
-    console.log("called fetchTracks")
+    // console.log("called fetchTracks")
     pl.tracks = [];
     let offset = 0;
     let result;
@@ -156,10 +160,31 @@ async function fetchTracks(token: string, pl: SimplifiedPlaylist): Promise<void>
 }
 
 function populateUItracks(pl: SimplifiedPlaylist): void {
-    console.log('called populateUItracks');
+    // console.log('called populateUItracks');
     const plList = document.getElementById(`PLID_${pl.id}_tracks`);
     for (const track of pl.tracks) {
         plList!.innerHTML += `<li>${track.name}</li>`;
     }
+    return;
+}
+
+function setUpButton(token: string, playlists: SimplifiedPlaylist[]): void {
+    console.log("called setUpButton");
+    const btn = document.getElementById("button");
+    btn!.addEventListener("click", () => {
+        transferSongs(token, playlists);
+    });
+}
+
+async function transferSongs(token: string, playlists: SimplifiedPlaylist[]) {
+    console.log("called TransferSong");
+    await fetch(`https://api.spotify.com/v1/playlists/${playlists[0].id}/tracks`, {
+        method: "POST",
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ 'uris': [playlists[1].tracks[0].uri ] })
+    });
     return;
 }
