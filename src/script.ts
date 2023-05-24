@@ -115,19 +115,20 @@ async function fetchPlaylists(token: string): Promise<SimplifiedPlaylist[]> {
 
 function populateUIplaylists(token: string, playlists: SimplifiedPlaylist[]) {
     const plList = document.getElementById("playlistList");
-    for (const pl of playlists) {
-        plList!.innerHTML += `<li id=${"PLID_" + pl.id}>${pl.name}</li>`;
-        plList!.innerHTML += `<ul id=${"PLID_" + pl.id + "_tracks"}></ul>`;
+    for (let i = 0; i < playlists.length; i++) {
+        plList!.innerHTML += `<li id=PL${i}>${playlists[i].name}</li>`;
+        plList!.innerHTML += `<ul id=PL${i}TL></ul>`;
+        playlists[i].htmlID = i;
     }
     let element;
-    for (const pl of playlists) {
-        element = document.getElementById(`PLID_${pl.id}`);
+    for (let i = 0; i < playlists.length; i++) {
+        element = document.getElementById(`PL${i}`);
         element?.addEventListener("click", async function () {
-            console.log(pl.name + " click event");
-            if (!(pl.expanded)) {
-                await fetchTracks(token, pl);
-                populateUItracks(pl); 
-                pl.expanded = true;
+            console.log(playlists[i].name + " click event");
+            if (!(playlists[i].expanded)) {
+                await fetchTracks(token, playlists[i]);
+                populateUItracks(playlists[i]); 
+                playlists[i].expanded = true;
             }
         });
     }
@@ -161,9 +162,9 @@ async function fetchTracks(token: string, pl: SimplifiedPlaylist): Promise<void>
 
 function populateUItracks(pl: SimplifiedPlaylist): void {
     // console.log('called populateUItracks');
-    const plList = document.getElementById(`PLID_${pl.id}_tracks`);
-    for (const track of pl.tracks) {
-        plList!.innerHTML += `<li>${track.name}</li>`;
+    const plList = document.getElementById(`PL${pl.htmlID}TL`);
+    for (let i = 0; i < pl.tracks.length; i++) {
+        plList!.innerHTML += `<li id=PL${pl.htmlID}TR${i}>${pl.tracks[i].name}</li>`;
     }
     const lis = plList?.getElementsByTagName('li');
     if (lis) {
@@ -192,13 +193,22 @@ async function transferSongs(token: string, playlists: SimplifiedPlaylist[]): Pr
     console.log("called TransferSong");
     const selectedTracks = document.getElementsByClassName('Selected');
     for (const track of selectedTracks) {
+        const found = track.id.match(/PL(\d+)TR(\d+)/); // track id is of form 'PL#TR#'
+        const p = Number(found[1]);
+        const t = Number(found[2]);
+        console.log(`p = ${p}, t = ${t}`);
+        console.log(`playlists[p] = ${playlists[p]}`);
+        console.log(`playlists[p].tracks[t] = ${playlists[p].tracks[t]}`);
+        console.log(`uri = ${playlists[p].tracks[t].uri}`)
+        // currently, user being able to select destination playlist is unimplemented
+        // using playlist[0] as test destination
         await fetch(`https://api.spotify.com/v1/playlists/${playlists[0].id}/tracks`, {
             method: "POST",
             headers: {
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ 'uris': [playlists[1].tracks[0].uri ] })
+            body: JSON.stringify({ 'uris': [playlists[p].tracks[t].uri ] })
         });
     }
     return;
