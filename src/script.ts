@@ -165,6 +165,18 @@ function populateUItracks(pl: SimplifiedPlaylist): void {
     for (const track of pl.tracks) {
         plList!.innerHTML += `<li>${track.name}</li>`;
     }
+    const lis = plList?.getElementsByTagName('li');
+    if (lis) {
+        for (const li of lis) {
+            li.addEventListener('click', markSelected);
+        }
+    }
+    return;
+}
+
+function markSelected(event: Event): void {
+    event.target.style.setProperty('background', '#0f0');
+    event.target.classList.add('Selected');
     return;
 }
 
@@ -176,15 +188,18 @@ function setUpButton(token: string, playlists: SimplifiedPlaylist[]): void {
     });
 }
 
-async function transferSongs(token: string, playlists: SimplifiedPlaylist[]) {
+async function transferSongs(token: string, playlists: SimplifiedPlaylist[]): Promise<void> {
     console.log("called TransferSong");
-    await fetch(`https://api.spotify.com/v1/playlists/${playlists[0].id}/tracks`, {
-        method: "POST",
-        headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ 'uris': [playlists[1].tracks[0].uri ] })
-    });
+    const selectedTracks = document.getElementsByClassName('Selected');
+    for (const track of selectedTracks) {
+        await fetch(`https://api.spotify.com/v1/playlists/${playlists[0].id}/tracks`, {
+            method: "POST",
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ 'uris': [playlists[1].tracks[0].uri ] })
+        });
+    }
     return;
 }
