@@ -182,15 +182,20 @@ function populateUItracks(pl: SimplifiedPlaylist): void {
     const lis = plList?.getElementsByTagName('li');
     if (lis) {
         for (const li of lis) {
-            li.addEventListener('click', markSelected);
+            li.addEventListener('click', toggleSelected);
         }
     }
     return;
 }
 
-function markSelected(event: Event): void {
-    event.target.style.setProperty('background', '#0f0');
-    event.target.classList.add('Selected');
+function toggleSelected(event: Event): void {
+    if (event.target.style.getPropertyValue('background')) {
+        event.target.style.removeProperty('background');
+        event.target.classList.remove('Selected');
+    } else { 
+        event.target.style.setProperty('background', '#0f0');
+        event.target.classList.add('Selected');
+    }
     return;
 }
 

@@ -2,36 +2,43 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
     <style>
       .selected {
         background: #0f0;
       }
     </style>
-    <title>My Spotify Profile</title>
-    <script type="module" src="src/script.ts"></script>
+    <title>Manage Your Spotify Playlists</title>
+    <script type="module" src="src/script.ts" defer></script>
+    <link href="styles/style.css" rel="stylesheet" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap" rel="stylesheet">
   </head>
   <body>
-    <h1>Manage Your Spotify Playlists</h1>
+    <img src="images/spotify-logo.webp" \
+    alt="Spotify logo: green circle containing three curved lines emanating upwards" />
+    <h1>Manage Your Playlists</h1>
 
     <section id="profile">
-    <h2>Logged in as <span id="displayName"></span></h2>
-    <span id="avatar"></span>
-    <ul>
+      <h2>Logged in as <span id="displayName"></span></h2>
+      <span id="avatar"></span>
+      <ul>
         <li>User ID: <span id="id"></span></li>
         <li>Email: <span id="email"></span></li>
         <li>Spotify URI: <a id="uri" href="#"></a></li>
         <li>Link: <a id="url" href="#"></a></li>
         <li>Profile Image: <span id="imgUrl"></span></li>
-    </ul>
-    </section>
-
-    <h2>Choose Songs to Transfer</h2>
-    <h3>Playlists</h3>
-    <section id="playlists">
-      <ul id="playlistList">
       </ul>
     </section>
 
-    <button id="button" type="button" onclick="alert('Hello!')">Transfer</button>
+    <section id="playlists">
+      <h2>Choose Songs</h2>
+      <h3>Playlists</h3>
+        <ul id="playlistList">
+        </ul>
+    </section>
+
+    <button id="button" type="button" onclick="alert('Transferring songs...')">Transfer</button>
   </body>
 </html>
