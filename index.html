@@ -3,13 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
-    <style>
-      .selected {
-        background: #0f0;
-      }
-    </style>
     <title>Manage Your Spotify Playlists</title>
-    <script type="module" src="src/script.ts" defer></script>
+    <script type="module" src="src/main.ts" defer></script>
     <link href="styles/style.css" rel="stylesheet" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -32,11 +27,12 @@
       </ul>
     </section>
 
-    <section id="playlists">
-      <h2>Choose Songs</h2>
-      <h3>Playlists</h3>
-        <ul id="playlistList">
-        </ul>
+    <section id="music">
+      <h2>Choose songs from your playlists</h2>
+      <div id="playlists">
+        <table>
+        </table>
+      </div>
     </section>
 
     <button id="button" type="button" onclick="alert('Transferring songs...')">Transfer</button>

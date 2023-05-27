@@ -47,7 +47,7 @@ interface SimplifiedPlaylist {
     type: string;
     uri: string;
     expanded: boolean;
-    htmlID: number;
+    index: number;
 }
 
 interface Track {
