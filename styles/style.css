@@ -24,7 +24,7 @@ img {
 }
 
 a:link {
-    color:lightgreen;
+    color:lime;
 }
 
 a:visited {
@@ -36,7 +36,7 @@ a:hover {
 }
 
 .selected {
-    background: green;
+    background: darkgreen;
 }
 
 .hide {

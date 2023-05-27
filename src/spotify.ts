@@ -50,13 +50,14 @@ export function populateUIplaylists(token: string, playlists: SimplifiedPlaylist
     let row2;
     let div;
     for (let i = 0; i < playlists.length; i++) {
+        // Div for each playlist
         div = table?.appendChild(document.createElement("div"));
 
         // Row for playlist name
         row1 = div?.appendChild(document.createElement("tr"));
         row1?.setAttribute("id", `PL${i}`);
         row1?.classList.add("playlist-name");
-        row1!.innerHTML += `<th>${playlists[i].name}</th>`;
+        row1!.innerHTML += `<th colspan="2">${playlists[i].name}</th>`;
 
         // Row for "Title" and "Artist" captions
         row2 = div?.appendChild(document.createElement("tr"));
@@ -74,7 +75,7 @@ export function populateUIplaylists(token: string, playlists: SimplifiedPlaylist
         element?.addEventListener("click", async function () {
             console.log(playlists[i].name + " click event");
             if (playlists[i].expanded) {
-                toggleShowPlaylist(i);
+                toggleExpandPlaylist(i);
             } else {
                 await fetchTracks(token, playlists[i]);
                 populateUItracks(playlists[i]); 
@@ -85,25 +86,12 @@ export function populateUIplaylists(token: string, playlists: SimplifiedPlaylist
     return;
 }
 
-function toggleShowPlaylist(i: number): void {
-    const div = document.getElementById(`PL${i}`)?.parentElement;
-    for (let tr of div!.children) {
-        if (tr.classList.contains("playlist-name")) {
-            continue;
-        }
-        tr.classList.toggle("hide");
-    }
-    // div?.classList.toggle("hideData"); // Can I delete this line?
-    return;
-}
-
 function populateUItracks(pl: SimplifiedPlaylist): void {
     // console.log('called populateUItracks');
     const div = document.getElementById(`PL${pl.index}`)?.parentElement;
     div!.lastElementChild.classList.remove("hide");
     let newRow;
     let artistNames;
-    // const tabl = plDiv?.appendChild(document.createElement("table"));
     for (let i = 0; i < pl.tracks.length; i++) {
         // create row with cells for track title, artist
         newRow = div?.appendChild(document.createElement("tr"));
@@ -128,8 +116,28 @@ export function setUpButton(token: string, playlists: SimplifiedPlaylist[]): voi
     // console.log("called setUpButton");
     const btn = document.getElementById("button");
     btn!.addEventListener("click", () => {
+        collapseAllPlaylists(playlists);
         transferSongs(token, playlists);
     });
+}
+
+function collapseAllPlaylists(playlists: SimplifiedPlaylist[]): void {
+    for (let i = 0; i < playlists.length; i++) {
+        if (!document.getElementById(`PL${i}`)?.nextElementSibling?.classList.contains("hide")) {
+            toggleExpandPlaylist(i);
+        }
+    }
+    return;
+}
+
+function toggleExpandPlaylist(i: number): void {
+    const div = document.getElementById(`PL${i}`)?.parentElement;
+    for (let tr of div!.children) {
+        if (!tr.classList.contains("playlist-name")) {
+            tr.classList.toggle("hide");
+        }
+    }
+    return;
 }
 
 async function transferSongs(token: string, playlists: SimplifiedPlaylist[]): Promise<void> {
