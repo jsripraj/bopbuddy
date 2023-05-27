@@ -52,7 +52,7 @@ interface SimplifiedPlaylist {
 
 interface Track {
     album: string;
-    artists: string[];
+    artists: Artist[];
     duration_ms: number;
     explicit: boolean;
     id: string;
@@ -60,4 +60,8 @@ interface Track {
     popularity: number;
     type: string;
     uri: string;
+}
+
+interface Artist {
+    name: string;
 }

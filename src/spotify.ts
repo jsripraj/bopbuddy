@@ -18,51 +18,6 @@ export async function fetchPlaylists(token: string): Promise<SimplifiedPlaylist[
     } 
 }
 
-export function populateUIplaylists(token: string, playlists: SimplifiedPlaylist[]): void {
-    const table = document.getElementById("playlists")?.firstElementChild;
-    let row;
-    let div;
-    for (let i = 0; i < playlists.length; i++) {
-        div = table?.appendChild(document.createElement("div"));
-        row = div?.appendChild(document.createElement("tr"));
-        row?.setAttribute("id", `PL${i}`);
-        row!.innerHTML += `<th>${playlists[i].name}</th>`;
-        playlists[i].index = i;
-    }
-    let element;
-    for (let i = 0; i < playlists.length; i++) {
-        element = document.getElementById(`PL${i}`);
-        element?.addEventListener("click", async function () {
-            console.log(playlists[i].name + " click event");
-            if (playlists[i].expanded) {
-                toggleShowPlaylist(i);
-            } else {
-                await fetchTracks(token, playlists[i]);
-                populateUItracks(playlists[i]); 
-                playlists[i].expanded = true;
-            }
-        });
-    }
-    return;
-}
-
-function toggleShowPlaylist(i: number): void {
-    const div = document.getElementById(`PL${i}`)?.parentElement;
-    // if (div?.hasAttribute('hidden')) {
-    //     tabl.removeAttribute('hidden');
-    // } else {
-    //     tabl?.setAttribute('hidden', '');
-    // }
-    const tds = div?.getElementsByClassName("song");
-    if (tds) {
-        for (let td of tds) {
-            td.parentElement!.classList.toggle("hide");
-        }
-    }
-    div?.classList.toggle("hideData");
-    return;
-}
-
 async function fetchTracks(token: string, pl: SimplifiedPlaylist): Promise<void> {
     // console.log("called fetchTracks")
     pl.tracks = [];
@@ -89,20 +44,80 @@ async function fetchTracks(token: string, pl: SimplifiedPlaylist): Promise<void>
     } 
 }
 
+export function populateUIplaylists(token: string, playlists: SimplifiedPlaylist[]): void {
+    const table = document.getElementById("playlists")?.firstElementChild;
+    let row1;
+    let row2;
+    let div;
+    for (let i = 0; i < playlists.length; i++) {
+        div = table?.appendChild(document.createElement("div"));
+
+        // Row for playlist name
+        row1 = div?.appendChild(document.createElement("tr"));
+        row1?.setAttribute("id", `PL${i}`);
+        row1?.classList.add("playlist-name");
+        row1!.innerHTML += `<th>${playlists[i].name}</th>`;
+
+        // Row for "Title" and "Artist" captions
+        row2 = div?.appendChild(document.createElement("tr"));
+        row2?.classList.add("hide");
+        row2!.innerHTML += ("<td><strong>Title</strong></td>");
+        row2!.innerHTML += ("<td><strong>Artist</strong></td>");
+
+        playlists[i].index = i;
+    }
+
+    // Add click listener to playlist-name row
+    let element;
+    for (let i = 0; i < playlists.length; i++) {
+        element = document.getElementById(`PL${i}`);
+        element?.addEventListener("click", async function () {
+            console.log(playlists[i].name + " click event");
+            if (playlists[i].expanded) {
+                toggleShowPlaylist(i);
+            } else {
+                await fetchTracks(token, playlists[i]);
+                populateUItracks(playlists[i]); 
+                playlists[i].expanded = true;
+            }
+        });
+    }
+    return;
+}
+
+function toggleShowPlaylist(i: number): void {
+    const div = document.getElementById(`PL${i}`)?.parentElement;
+    for (let tr of div!.children) {
+        if (tr.classList.contains("playlist-name")) {
+            continue;
+        }
+        tr.classList.toggle("hide");
+    }
+    // div?.classList.toggle("hideData"); // Can I delete this line?
+    return;
+}
+
 function populateUItracks(pl: SimplifiedPlaylist): void {
     // console.log('called populateUItracks');
     const div = document.getElementById(`PL${pl.index}`)?.parentElement;
+    div!.lastElementChild.classList.remove("hide");
     let newRow;
+    let artistNames;
     // const tabl = plDiv?.appendChild(document.createElement("table"));
     for (let i = 0; i < pl.tracks.length; i++) {
+        // create row with cells for track title, artist
         newRow = div?.appendChild(document.createElement("tr"));
-        newRow!.innerHTML += `<td class="song" id="PL${pl.index}TR${i}">${pl.tracks[i].name}</td>`;
+        newRow?.setAttribute("id", `PL${pl.index}TR${i}`);
+        newRow?.classList.add("track");
+        newRow!.innerHTML += `<td>${pl.tracks[i].name}</td>`;
+        artistNames = pl.tracks[i].artists.map(x => x.name);
+        newRow!.innerHTML += `<td>${artistNames.join(", ")}`;
     }
-    const songs = div?.getElementsByClassName("song");
-    if (songs) {
-        for (const song of songs) {
-            song.addEventListener('click', (ev) => {
-                ev.target.classList.toggle('selected');
+    const tracks = div?.getElementsByClassName("track");
+    if (tracks) {
+        for (const track of tracks) {
+            track.addEventListener('click', (ev) => {
+                ev.target.parentElement.classList.toggle('selected');
             });
         }
     }
@@ -110,7 +125,7 @@ function populateUItracks(pl: SimplifiedPlaylist): void {
 }
 
 export function setUpButton(token: string, playlists: SimplifiedPlaylist[]): void {
-    console.log("called setUpButton");
+    // console.log("called setUpButton");
     const btn = document.getElementById("button");
     btn!.addEventListener("click", () => {
         transferSongs(token, playlists);
@@ -119,7 +134,7 @@ export function setUpButton(token: string, playlists: SimplifiedPlaylist[]): voi
 
 async function transferSongs(token: string, playlists: SimplifiedPlaylist[]): Promise<void> {
     console.log("called TransferSong");
-    const selectedTracks = document.getElementsByClassName('Selected');
+    const selectedTracks = document.getElementsByClassName('selected');
     for (const track of selectedTracks) {
         const found = track.id.match(/PL(\d+)TR(\d+)/); // track id is of form 'PL#TR#'
         const p = Number(found[1]);
