@@ -106,7 +106,7 @@ function setPlaylistClickHandler(token: string, playlists: SimplifiedPlaylist[])
         element = document.getElementById(`PL${i}`);
         element?.addEventListener("click", async function (ev) {
             console.log(playlists[i].name + " click event");
-            btn = document.getElementById("button");
+            btn = document.getElementById("transferBtn");
             if (btn?.classList.contains("pending")) {
                 oldSelections = document.getElementsByClassName("selected-playlist");
                 for (let old of oldSelections) {
@@ -127,9 +127,9 @@ function setPlaylistClickHandler(token: string, playlists: SimplifiedPlaylist[])
     }
 }
 
-export function setUpButton(token: string, playlists: SimplifiedPlaylist[]): void {
-    // console.log("called setUpButton");
-    const btn = document.getElementById("button");
+export function setUpTransferButton(token: string, playlists: SimplifiedPlaylist[]): void {
+    // console.log("called setUpTransferButton");
+    const btn = document.getElementById("transferBtn");
     btn!.addEventListener("click", (ev) => {
         // the second time user clicks button
         if (ev.target.classList.contains("pending")) {
@@ -151,11 +151,27 @@ export function setUpButton(token: string, playlists: SimplifiedPlaylist[]): voi
     });
 }
 
+export function setUpDeleteButton(token: string, playlists: SimplifiedPlaylist[]): void {
+    const deleteBtn = document.getElementById("deleteBtn");
+    const deleteDialog = document.getElementById("deleteDialog");
+    const cancelBtn = document.getElementById("cancelBtn");
+    const confirmBtn = document.getElementById("confirmBtn");
+    deleteBtn!.addEventListener("click", () => {
+        deleteDialog!.showModal();
+    });
+    cancelBtn?.addEventListener("click", () => {
+        deleteDialog?.close();
+    });
+    confirmBtn?.addEventListener("click", () => {
+        deleteSongs(token, playlists);
+        deleteDialog.close();
+    });
+}
+
 function toggleInstructions() {
     for (let h2 of document.getElementsByClassName("instruct")) {
         h2.classList.toggle("hide");
     }
-
 }
 
 function collapseAllPlaylists(playlists: SimplifiedPlaylist[]): void {
@@ -180,18 +196,57 @@ function toggleExpandPlaylist(i: number): void {
 async function transferSongs(token: string, playlists: SimplifiedPlaylist[], dest: number): Promise<void> {
     console.log("called TransferSong");
     const selectedTracks = document.getElementsByClassName('selected');
+    let found, p, t;
+    let uris = [];
+    let n = 0;
     for (const track of selectedTracks) {
-        const found = track.id.match(/PL(\d+)TR(\d+)/); // track id is of form 'PL#TR#'
-        const p = Number(found[1]);
-        const t = Number(found[2]);
-        await fetch(`https://api.spotify.com/v1/playlists/${playlists[dest].id}/tracks`, {
-            method: "POST",
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ 'uris': [playlists[p].tracks[t].uri ] })
-        });
+        found = track.id.match(/PL(\d+)TR(\d+)/); // track id is of form 'PL#TR#'
+        p = Number(found[1]);
+        t = Number(found[2]);
+        uris.push(playlists[p].tracks[t].uri);
+        n++;
+        if (n === selectedTracks.length || n === 100) {
+            await fetch(`https://api.spotify.com/v1/playlists/${playlists[dest].id}/tracks`, {
+                method: "POST",
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    'uris': uris
+                })
+            });
+            uris = [];
+            n = 0;
+        }
     }
     return;
+}
+
+async function deleteSongs(token: string, playlists: SimplifiedPlaylist[]): Promise<void> {
+    const selected = document.getElementsByClassName('selected');
+    let found, p, t;
+    let uris = [];
+    let n = 0;
+    for (const track of selected) {
+        found = track.id.match(/PL(\d+)TR(\d+)/); // track id is of form 'PL#TR#'
+        p = Number(found[1]);
+        t = Number(found[2]);
+        uris.push({"uri": playlists[p].tracks[t].uri});
+        n++;
+        if (n === selected.length || n === 100) {
+            await fetch(`https://api.spotify.com/v1/playlists/${playlists[p].id}/tracks`, {
+                method: "DELETE", 
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    "tracks": uris
+                })
+            });
+            uris = [];
+            n = 0;
+        }
+    }
 }

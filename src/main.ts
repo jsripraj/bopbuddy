@@ -3,7 +3,7 @@ import {
 } from "./auth-user";
 
 import {
-    fetchPlaylists, populateUIplaylists, setUpButton
+    fetchPlaylists, populateUIplaylists, setUpDeleteButton, setUpTransferButton
 } from "./spotify.ts"
 
 if (!code) {
@@ -14,5 +14,6 @@ if (!code) {
     const playlists = await fetchPlaylists(accessToken);
     populateUIprofile(profile);
     populateUIplaylists(accessToken, playlists);
-    setUpButton(accessToken, playlists);
+    setUpTransferButton(accessToken, playlists);
+    setUpDeleteButton(accessToken, playlists);
 }
