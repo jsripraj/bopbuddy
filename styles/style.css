@@ -39,6 +39,10 @@ a:hover {
     background: darkgreen;
 }
 
+.selected-playlist {
+    background: darkred;
+}
+
 .hide {
     display: none;
 }

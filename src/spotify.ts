@@ -67,22 +67,7 @@ export function populateUIplaylists(token: string, playlists: SimplifiedPlaylist
 
         playlists[i].index = i;
     }
-
-    // Add click listener to playlist-name row
-    let element;
-    for (let i = 0; i < playlists.length; i++) {
-        element = document.getElementById(`PL${i}`);
-        element?.addEventListener("click", async function () {
-            console.log(playlists[i].name + " click event");
-            if (playlists[i].expanded) {
-                toggleExpandPlaylist(i);
-            } else {
-                await fetchTracks(token, playlists[i]);
-                populateUItracks(playlists[i]); 
-                playlists[i].expanded = true;
-            }
-        });
-    }
+    setPlaylistClickHandler(token, playlists);
     return;
 }
 
@@ -112,13 +97,65 @@ function populateUItracks(pl: SimplifiedPlaylist): void {
     return;
 }
 
+function setPlaylistClickHandler(token: string, playlists: SimplifiedPlaylist[]): void {
+    // Attach click handler to table row (not cell) displaying name of playlist
+    let element;
+    let btn;
+    let oldSelections;
+    for (let i = 0; i < playlists.length; i++) {
+        element = document.getElementById(`PL${i}`);
+        element?.addEventListener("click", async function (ev) {
+            console.log(playlists[i].name + " click event");
+            btn = document.getElementById("button");
+            if (btn?.classList.contains("pending")) {
+                oldSelections = document.getElementsByClassName("selected-playlist");
+                for (let old of oldSelections) {
+                    old.classList.remove("selected-playlist");
+                }
+                ev.target.parentElement.classList.add("selected-playlist");
+                btn.disabled = false;
+            } else {
+                if (playlists[i].expanded) {
+                    toggleExpandPlaylist(i);
+                } else {
+                    await fetchTracks(token, playlists[i]);
+                    populateUItracks(playlists[i]); 
+                    playlists[i].expanded = true;
+                }
+            }
+        });
+    }
+}
+
 export function setUpButton(token: string, playlists: SimplifiedPlaylist[]): void {
     // console.log("called setUpButton");
     const btn = document.getElementById("button");
-    btn!.addEventListener("click", () => {
-        collapseAllPlaylists(playlists);
-        transferSongs(token, playlists);
+    btn!.addEventListener("click", (ev) => {
+        // the second time user clicks button
+        if (ev.target.classList.contains("pending")) {
+            const selectedPlaylist = document.getElementsByClassName("selected-playlist")[0]
+            const found = selectedPlaylist.id.match(/PL(\d+)/); // playlist id is of form 'PL#'
+            const p = Number(found[1]);
+            transferSongs(token, playlists, p);
+            selectedPlaylist.classList.remove("selected-playlist");
+            toggleInstructions();
+            ev.target.classList.remove("pending");
+
+        // the first time user clicks button
+        } else {
+            ev.target.classList.add("pending");
+            ev.target.disabled = true;
+            collapseAllPlaylists(playlists);
+            toggleInstructions();
+        }
     });
+}
+
+function toggleInstructions() {
+    for (let h2 of document.getElementsByClassName("instruct")) {
+        h2.classList.toggle("hide");
+    }
+
 }
 
 function collapseAllPlaylists(playlists: SimplifiedPlaylist[]): void {
@@ -140,16 +177,14 @@ function toggleExpandPlaylist(i: number): void {
     return;
 }
 
-async function transferSongs(token: string, playlists: SimplifiedPlaylist[]): Promise<void> {
+async function transferSongs(token: string, playlists: SimplifiedPlaylist[], dest: number): Promise<void> {
     console.log("called TransferSong");
     const selectedTracks = document.getElementsByClassName('selected');
     for (const track of selectedTracks) {
         const found = track.id.match(/PL(\d+)TR(\d+)/); // track id is of form 'PL#TR#'
         const p = Number(found[1]);
         const t = Number(found[2]);
-        // currently, user being able to select destination playlist is unimplemented
-        // using playlist[0] as test destination
-        await fetch(`https://api.spotify.com/v1/playlists/${playlists[0].id}/tracks`, {
+        await fetch(`https://api.spotify.com/v1/playlists/${playlists[dest].id}/tracks`, {
             method: "POST",
             headers: {
                 'Authorization': `Bearer ${token}`,
