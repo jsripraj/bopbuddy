@@ -81,7 +81,10 @@ function populateTracks(pl: SimplifiedPlaylist): void {
     for (let i = 0; i < pl.tracks.length; i++) {
         newRow = div?.appendChild(document.createElement("tr"));
         newRow?.setAttribute("id", `PL${pl.index}TR${i}`);
-        newRow?.classList.add("track", "hide");
+        newRow?.classList.add("track");
+        if (!div?.classList.contains("expanded")) {
+            newRow?.classList.add("hide");
+        }
         newRow!.innerHTML += `<td>${pl.tracks[i].name}</td>`;
         artistNames = pl.tracks[i].artists.map(x => x.name);
         newRow!.innerHTML += `<td>${artistNames.join(", ")}`;
@@ -107,7 +110,7 @@ function setPlaylistClickHandler(token: string, playlists: SimplifiedPlaylist[])
     let oldSelections;
     for (let i = 0; i < playlists.length; i++) {
         tr = document.getElementById(`PL${i}`);
-        tr?.addEventListener("click", async function (ev) {
+        tr?.addEventListener("click", async function () {
             console.log(playlists[i].name + " click event");
             transferBtn = document.getElementById("transferBtn");
             if (transferBtn?.classList.contains("pending")) {
@@ -196,10 +199,21 @@ function collapseAllPlaylists(playlists: SimplifiedPlaylist[]): void {
 
 function toggleExpandPlaylist(pl: SimplifiedPlaylist): void {
     const div = document.getElementById(`PL${pl.index}`)?.parentElement;
+    const expanded = div!.classList.contains("expanded");
     for (let tr of div!.children) {
-        if (!tr.classList.contains("playlist-name")) {
-            tr.classList.toggle("hide");
+        if (tr.classList.contains("playlist-name")) {
+            continue;
         }
+        if (expanded) {
+            tr.classList.add("hide");
+        } else {
+            tr.classList.remove("hide");
+        }
+    }
+    if (expanded) {
+        div?.classList.remove("expanded");
+    } else {
+        div?.classList.add("expanded");
     }
     return;
 }
@@ -313,7 +327,7 @@ async function refresh(token: string, pls: SimplifiedPlaylist[]): Promise<void> 
 
         await fetchTracks(token, pl);
         populateTracks(pl);
-        collapseAllPlaylists(pls);
+        // collapseAllPlaylists(pls);
     }
     return;
 }
