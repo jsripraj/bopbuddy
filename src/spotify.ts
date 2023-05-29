@@ -136,25 +136,27 @@ function setPlaylistClickHandler(token: string, playlists: SimplifiedPlaylist[])
 export function setUpTransferButton(token: string, playlists: SimplifiedPlaylist[]): void {
     // console.log("called setUpTransferButton");
     const btn = document.getElementById("transferBtn");
-    btn!.addEventListener("click", (ev) => {
+    btn!.addEventListener("click", async () => {
         // the second time user clicks button
-        if (ev.target.classList.contains("pending")) {
-            const selectedPlaylist = document.getElementsByClassName("selected-playlist")[0]
-            const found = selectedPlaylist.id.match(/PL(\d+)/); // playlist id is of form 'PL#'
+        if (btn!.classList.contains("pending")) {
+            const dest = document.getElementsByClassName("selected-playlist")[0] // 1-element array
+            const found = dest.id.match(/PL(\d+)/); // playlist id is of form 'PL#'
             const p = Number(found[1]);
-            transferSongs(token, playlists, p);
-            selectedPlaylist.classList.remove("selected-playlist");
+            await transferSongs(token, playlists, p);
+            btn!.classList.remove("pending");
             toggleInstructions();
-            ev.target.classList.remove("pending");
+            dest.classList.remove("selected-playlist");
+            refresh(token, playlists, [p]);
 
         // the first time user clicks button
         } else {
-            ev.target.classList.add("pending");
-            ev.target.disabled = true;
+            btn!.classList.add("pending");
+            btn!.disabled = true;
             collapseAllPlaylists(playlists);
             toggleInstructions();
         }
     });
+    return;
 }
 
 export function setUpDeleteButton(token: string, playlists: SimplifiedPlaylist[]): void {
@@ -256,18 +258,22 @@ async function deleteSongs(token: string, playlists: SimplifiedPlaylist[]): Prom
     let i = 0, n = 0;
     let found, p, t;
     let pOld = -1;
-    let uris = new Array(); 
+    let uris = []; 
+    const needRefresh = [];
     while (i < selected.length) {
         found = selected[i].id.match(/PL(\d+)TR(\d+)/); // track id is of form 'PL#TR#'
         p = Number(found[1]);
         t = Number(found[2]);
+        if (p !== pOld) {
+            needRefresh.push(p);
+        }
 
         /* Delete request can only handle songs from one playlist at a time.
         If the playlist you're traversing has changed, send and clear out the songs from
         the last playlist, then try again. */
         if (p !== pOld && i > 0) {
             await sendDeleteRequest(token, playlists, pOld, uris);
-            uris = new Array({"uri": playlists[p].tracks[t].uri}); 
+            uris = [{"uri": playlists[p].tracks[t].uri}]; 
             n = 1;
             pOld = p;
             continue;
@@ -281,7 +287,7 @@ async function deleteSongs(token: string, playlists: SimplifiedPlaylist[]): Prom
         Send the request and reset the array */
         if (n === 100) {
             await sendDeleteRequest(token, playlists, p, uris);
-            uris = new Array();
+            uris = [];
             n = 0;
             i++;
             continue;
@@ -293,6 +299,7 @@ async function deleteSongs(token: string, playlists: SimplifiedPlaylist[]): Prom
             i++;
         }
     }
+    refresh(token, playlists, needRefresh);
 }
 
 async function sendDeleteRequest(token: string, pls: SimplifiedPlaylist[], j: number, uris: Object[]): Promise<void> {
@@ -309,10 +316,12 @@ async function sendDeleteRequest(token: string, pls: SimplifiedPlaylist[], j: nu
     return;
 }
 
-async function refresh(token: string, pls: SimplifiedPlaylist[]): Promise<void> {
+async function refresh(token: string, pls: SimplifiedPlaylist[], inds: number[] = [...Array(pls.length).keys()]): Promise<void> {
+    /* inds holds the indexes of the playlists to operate on.
+    If not passed, default to operating on every playlist. */
     let div, n, m, tr;
-    for (const pl of pls) {
-        div = document.getElementById(`PL${pl.index}`)?.parentElement;
+    for (let ind of inds) {
+        div = document.getElementById(`PL${ind}`)?.parentElement;
 
         // Delete all div children except for the first (playlist name) and second (column labels) rows
         n = div!.childElementCount - 2; 
@@ -325,9 +334,8 @@ async function refresh(token: string, pls: SimplifiedPlaylist[]): Promise<void> 
             tr?.remove();
         }
 
-        await fetchTracks(token, pl);
-        populateTracks(pl);
-        // collapseAllPlaylists(pls);
+        await fetchTracks(token, pls[ind]);
+        populateTracks(pls[ind]);
     }
     return;
 }
