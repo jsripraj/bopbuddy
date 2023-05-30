@@ -19,7 +19,7 @@ export async function fetchPlaylists(token: string): Promise<SimplifiedPlaylist[
 }
 
 async function fetchTracks(token: string, pl: SimplifiedPlaylist): Promise<void> {
-    console.log(`called fetchTracks on PL${pl.index}`);
+    // console.log(`called fetchTracks on PL${pl.index}`);
     pl.tracks = [];
     let offset = 0;
     let result;
@@ -72,7 +72,7 @@ export function populatePlaylists(token: string, playlists: SimplifiedPlaylist[]
 }
 
 function populateTracks(pl: SimplifiedPlaylist): void {
-    console.log(`called populateTracks on PL${pl.index}`);
+    console.log(`populating PL${pl.index}`);
     const div = document.getElementById(`PL${pl.index}`)?.parentElement;
 
     // create rows with cells for title and artist
@@ -97,7 +97,7 @@ function populateTracks(pl: SimplifiedPlaylist): void {
     if (tracks) {
         for (const track of tracks) {
             track.addEventListener('click', (ev) => {
-                ev.target.parentElement.classList.toggle('selected');
+                (ev.target as Node)!.parentElement!.classList.toggle('selected');
             });
         }
     }
@@ -119,7 +119,7 @@ function setPlaylistClickHandler(token: string, playlists: SimplifiedPlaylist[])
                     old.classList.remove("selected-playlist");
                 }
                 this.classList.add("selected-playlist");
-                transferBtn.disabled = false;
+                (transferBtn as HTMLButtonElement).disabled = false;
             } else {
                 if (playlists[i].populated) {
                     toggleExpandPlaylist(playlists[i]);
@@ -141,7 +141,17 @@ export function setUpTransferButton(token: string, playlists: SimplifiedPlaylist
         if (btn!.classList.contains("pending")) {
             const dest = document.getElementsByClassName("selected-playlist")[0] // 1-element array
             const found = dest.id.match(/PL(\d+)/); // playlist id is of form 'PL#'
-            const p = Number(found[1]);
+            let p: number;
+            try {
+                if (found) {
+                    p = Number(found[1]);
+                } else {
+                    throw new Error("Error identifying selected playlist");
+                }
+            } catch (e) {
+                console.error(e);
+                return;
+            }
             await transferSongs(token, playlists, p);
             btn!.classList.remove("pending");
             toggleInstructions();
@@ -151,7 +161,7 @@ export function setUpTransferButton(token: string, playlists: SimplifiedPlaylist
         // the first time user clicks button
         } else {
             btn!.classList.add("pending");
-            btn!.disabled = true;
+            (btn as HTMLButtonElement)!.disabled = true;
             collapseAllPlaylists(playlists);
             toggleInstructions();
         }
@@ -165,14 +175,14 @@ export function setUpDeleteButton(token: string, playlists: SimplifiedPlaylist[]
     const cancelBtn = document.getElementById("cancelBtn");
     const confirmBtn = document.getElementById("confirmBtn");
     deleteBtn!.addEventListener("click", () => {
-        deleteDialog!.showModal();
+        (deleteDialog as HTMLDialogElement)!.showModal();
     });
     cancelBtn?.addEventListener("click", () => {
-        deleteDialog?.close();
+        (deleteDialog as HTMLDialogElement)?.close();
     });
     confirmBtn?.addEventListener("click", () => {
         deleteSongs(token, playlists);
-        deleteDialog.close();
+        (deleteDialog as HTMLDialogElement).close();
     });
 }
 
@@ -228,21 +238,21 @@ async function transferSongs(token: string, playlists: SimplifiedPlaylist[], des
     let n = 0;
     for (const track of selectedTracks) {
         found = track.id.match(/PL(\d+)TR(\d+)/); // track id is of form 'PL#TR#'
-        p = Number(found[1]);
-        t = Number(found[2]);
+        try {
+            if (found) {
+                p = Number(found[1]);
+                t = Number(found[2]);
+            } else {
+                throw new Error("Unable to identify selected tracks");
+            }
+        } catch(e) {
+            console.error(e);
+            return;
+        }
         uris.push(playlists[p].tracks[t].uri);
         n++;
         if (n === selectedTracks.length || n === 100) {
-            await fetch(`https://api.spotify.com/v1/playlists/${playlists[dest].id}/tracks`, {
-                method: "POST",
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    'uris': uris
-                })
-            });
+            await sendAddRequest(token, playlists[dest], uris);
             uris = [];
             n = 0;
         }
@@ -250,20 +260,47 @@ async function transferSongs(token: string, playlists: SimplifiedPlaylist[], des
     return;
 }
 
+async function sendAddRequest(token: string, dest: SimplifiedPlaylist, uris: string[]): Promise<void> {
+    console.log(`sending add request`);
+    await fetch(`https://api.spotify.com/v1/playlists/${dest.id}/tracks`, {
+        method: "POST",
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            'uris': uris
+        })
+    });
+    return;
+}
+
 async function deleteSongs(token: string, playlists: SimplifiedPlaylist[]): Promise<void> {
     /* Note: Spotify API will delete ALL duplicates of a song, even if only one is sent in
-    a delete request. */
+    a delete request. This function handles this adding back the appropriate number of
+    duplicates, if necessary. */
 
     const selected = document.getElementsByClassName('selected');
     let i = 0, n = 0;
-    let found, p, t;
+    let found: any, p: number, t: number;
     let pOld = -1;
-    let uris = []; 
-    const needRefresh = [];
+    let uris: any[] = []; 
+    const needRefresh: number[] = [];
+    let dupUris: string[]  = [];
     while (i < selected.length) {
         found = selected[i].id.match(/PL(\d+)TR(\d+)/); // track id is of form 'PL#TR#'
-        p = Number(found[1]);
-        t = Number(found[2]);
+        console.log(found[0]);
+        try {
+            if (found) {
+                p = Number(found[1]);
+                t = Number(found[2]);
+            } else {
+                throw new Error("Unable to identify selected tracks");
+            }
+        } catch(e) {
+            console.error(e);
+            return;
+        }
         if (p !== pOld) {
             needRefresh.push(p);
         }
@@ -272,9 +309,13 @@ async function deleteSongs(token: string, playlists: SimplifiedPlaylist[]): Prom
         If the playlist you're traversing has changed, send and clear out the songs from
         the last playlist, then try again. */
         if (p !== pOld && i > 0) {
+            dupUris = getDuplicates(playlists[pOld], uris);
             await sendDeleteRequest(token, playlists, pOld, uris);
-            uris = [{"uri": playlists[p].tracks[t].uri}]; 
-            n = 1;
+            if (dupUris.length) { 
+                await sendAddRequest(token, playlists[pOld], dupUris);
+            }
+            uris = []; 
+            n = 0;
             pOld = p;
             continue;
         }
@@ -286,7 +327,11 @@ async function deleteSongs(token: string, playlists: SimplifiedPlaylist[]): Prom
         /* Delete request can only handle 100 songs at a time.
         Send the request and reset the array */
         if (n === 100) {
+            dupUris = getDuplicates(playlists[p], uris);
             await sendDeleteRequest(token, playlists, p, uris);
+            if (dupUris.length) {
+                await sendAddRequest(token, playlists[p], dupUris);
+            }
             uris = [];
             n = 0;
             i++;
@@ -295,14 +340,62 @@ async function deleteSongs(token: string, playlists: SimplifiedPlaylist[]): Prom
 
         /* Send a final request once you've traversed all the songs */
         if (i === selected.length-1) {
+            dupUris = getDuplicates(playlists[p], uris);
             await sendDeleteRequest(token, playlists, p, uris);
-            i++;
+            if (dupUris.length) {
+                await sendAddRequest(token, playlists[p], dupUris);
+            }
+        }
+        i++;
+    }
+    await refresh(token, playlists, needRefresh);
+    return;
+}
+
+function getDuplicates(pl: SimplifiedPlaylist, uriObjs: any[]): string[] {
+    console.log(`getting duplicates`);
+    let n: any = {};
+    let m: any = {};
+
+    // count occurences of each song passed in pl
+    for (const s of pl.tracks) {
+        if (Object.hasOwn(n, s.uri)) {
+            n[s.uri]++;
+        } else {
+            n[s.uri] = 1;
         }
     }
-    refresh(token, playlists, needRefresh);
+
+    // count occurences of each song passed in uris
+    for (const uriObj of uriObjs) {
+        // console.log(`uri = ${JSON.stringify(uriObj)}`);
+        if (Object.hasOwn(m, uriObj.uri)) {
+            m[uriObj.uri]++;
+        } else {
+            m[uriObj.uri] = 1;
+        }
+    }
+
+    /* Calculate how many occurences of each song should remain in pl,
+    and return these to be re-added in the calling function (because the
+    Spotify API will delete all duplicates). */
+    let remain;
+    const reAdd = [];
+    for (const uri of Object.keys(m)) {
+        // console.log(`uri = ${uri}`);
+        remain = n[uri] - m[uri];
+        // console.log(`remain = ${remain}`);
+        if (remain > 0) {
+            for (let i = 0; i < remain; i++) {
+                reAdd.push(uri);
+            }
+        }
+    }
+    return reAdd;
 }
 
 async function sendDeleteRequest(token: string, pls: SimplifiedPlaylist[], j: number, uris: Object[]): Promise<void> {
+    console.log(`sending delete request`);
     await fetch(`https://api.spotify.com/v1/playlists/${pls[j].id}/tracks`, {
         method: "DELETE", 
         headers: {
@@ -321,6 +414,7 @@ async function refresh(token: string, pls: SimplifiedPlaylist[], inds: number[] 
     If not passed, default to operating on every playlist. */
     let div, n, m, tr;
     for (let ind of inds) {
+        console.log(`refreshing ${pls[ind].name}`);
         div = document.getElementById(`PL${ind}`)?.parentElement;
 
         // Delete all div children except for the first (playlist name) and second (column labels) rows
