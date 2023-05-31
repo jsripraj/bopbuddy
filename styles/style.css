@@ -35,10 +35,6 @@ a:hover {
     text-decoration: none;
 }
 
-.selected {
-    background: darkgreen;
-}
-
 .selected-playlist {
     background: darkred;
 }
@@ -58,4 +54,8 @@ th, td {
 
 tr:hover {
     background-color: darkslategray;
+}
+
+.selected {
+    background: darkgreen;
 }

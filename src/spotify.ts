@@ -77,7 +77,7 @@ export function populateTracks(pl: SimplifiedPlaylist): void {
     console.log(`populating PL${pl.index}`);
     const div = document.getElementById(`PL${pl.index}`)?.parentElement;
 
-    // create rows with cells for title and artist
+    // Create rows with cells for title and artist
     let newRow;
     let artistNames;
     for (let i = 0; i < pl.tracks.length; i++) {
@@ -90,16 +90,74 @@ export function populateTracks(pl: SimplifiedPlaylist): void {
         newRow!.innerHTML += `<td>${pl.tracks[i].name}</td>`;
         artistNames = pl.tracks[i].artists.map(x => x.name);
         newRow!.innerHTML += `<td>${artistNames.join(", ")}`;
+
+        // Initialize first row as prior selection for shift-select
+        if (i === 0) {
+            newRow?.classList.add(`PL${pl.index}-prior-selection`);
+        }
     }
-
     pl.populated = true;
+    setTracksClickHandler(pl);
+    return;
+}
 
-    // mark song row selected when user clicks on it
+function setTracksClickHandler(pl: SimplifiedPlaylist): void {
+    const div = document.getElementById(`PL${pl.index}`)?.parentElement;
     const tracks = div?.getElementsByClassName("track");
     if (tracks) {
         for (const track of tracks) {
             track.addEventListener('click', (ev) => {
-                (ev.target as Node)!.parentElement!.classList.toggle('selected');
+                const curSel = (ev.target as Node)!.parentElement
+                const mark = `PL${pl.index}-prior-selection`;
+                const priorSel = document.getElementsByClassName(mark)[0];
+
+                if ((ev as MouseEvent).shiftKey && curSel !== priorSel) {
+                    // Get prior selection's position
+                    const priorID = priorSel.getAttribute("id");
+                    let found = priorID!.match(/PL\d+TR(\d+)/); // track id is of form 'PL#TR#'
+                    let priorPos;
+                    try {
+                        if (found) {
+                            priorPos = Number(found[1]);
+                        } else {
+                            throw new Error("Unable to identify selected tracks");
+                        }
+                    } catch(e) {
+                        console.error(e);
+                        return;
+                    }
+
+                    // Get current selection's position
+                    const curID = curSel!.getAttribute("id");
+                    found = curID!.match(/PL\d+TR(\d+)/); // track id is of form 'PL#TR#'
+                    let curPos;
+                    try {
+                        if (found) {
+                            curPos = Number(found[1]);
+                        } else {
+                            throw new Error("Unable to identify selected tracks");
+                        }
+                    } catch(e) {
+                        console.error(e);
+                        return;
+                    }
+                    
+                    const start = (priorPos < curPos ? priorPos : curPos);
+                    const end = (priorPos < curPos ? curPos : priorPos);
+                    let r;
+                    for (let i = start; i <= end; i++) {
+                        r = document.getElementById(`PL${pl.index}TR${i}`);
+                        if (!r?.classList.contains('selected')) {
+                            r!.classList.add('selected');
+                        }
+                    } 
+                } else {
+                    curSel!.classList.toggle('selected');
+                }
+                
+                // Update most recent selection
+                priorSel.classList.remove(mark);
+                curSel?.classList.add(mark);
             });
         }
     }
