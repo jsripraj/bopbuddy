@@ -133,39 +133,76 @@ function setPlaylistClickHandler(token: string, playlists: SimplifiedPlaylist[])
     }
 }
 
-export function setUpTransferButton(token: string, playlists: SimplifiedPlaylist[]): void {
-    // console.log("called setUpTransferButton");
-    const btn = document.getElementById("transferBtn");
-    btn!.addEventListener("click", async () => {
-        // the second time user clicks button
-        if (btn!.classList.contains("pending")) {
-            const dest = document.getElementsByClassName("selected-playlist")[0] // 1-element array
-            const found = dest.id.match(/PL(\d+)/); // playlist id is of form 'PL#'
-            let p: number;
-            try {
-                if (found) {
-                    p = Number(found[1]);
-                } else {
-                    throw new Error("Error identifying selected playlist");
-                }
-            } catch (e) {
-                console.error(e);
-                return;
-            }
-            await transferSongs(token, playlists, p);
-            btn!.classList.remove("pending");
-            toggleInstructions();
-            dest.classList.remove("selected-playlist");
-            refresh(token, playlists, [p]);
+///////////////////// OLD VERSION - DELETE ////////////////
+// export function setUpTransferButton(token: string, playlists: SimplifiedPlaylist[]): void {
+//     // console.log("called setUpTransferButton");
+//     const btn = document.getElementById("transferBtn");
+//     btn!.addEventListener("click", async () => {
+//         // the second time user clicks button
+//         if (btn!.classList.contains("pending")) {
+//             const dest = document.getElementsByClassName("selected-playlist")[0] // 1-element array
+//             const found = dest.id.match(/PL(\d+)/); // playlist id is of form 'PL#'
+//             let p: number;
+//             try {
+//                 if (found) {
+//                     p = Number(found[1]);
+//                 } else {
+//                     throw new Error("Error identifying selected playlist");
+//                 }
+//             } catch (e) {
+//                 console.error(e);
+//                 return;
+//             }
+//             await transferSongs(token, playlists, p);
+//             btn!.classList.remove("pending");
+//             toggleInstructions();
+//             dest.classList.remove("selected-playlist");
+//             refresh(token, playlists, [p]);
 
-        // the first time user clicks button
+//         // the first time user clicks button
+//         } else {
+//             btn!.classList.add("pending");
+//             (btn as HTMLButtonElement)!.disabled = true;
+//             collapseAllPlaylists(playlists);
+//             toggleInstructions();
+//         }l
+//     });
+//     return;
+// }
+
+export function setUpTransferButton(token: string, playlists: SimplifiedPlaylist[]): void {
+    const transferBtn = document.getElementById("transferBtn");
+    const transferDialog = document.getElementById('transferDialog');
+    const selectEl = transferDialog?.querySelector('select');
+    const confirmBtn = transferDialog?.querySelector('#confBtn');
+
+    (confirmBtn as HTMLButtonElement).disabled = true;
+
+    for (const pl of playlists) {
+        selectEl!.innerHTML += `<option value=${pl.index}>${pl.name}</option>`;
+    }
+    transferBtn?.addEventListener('click', () => {
+        (transferDialog as HTMLDialogElement)!.showModal();
+    });
+    selectEl?.addEventListener('change', () => {
+        (confirmBtn as HTMLButtonElement).value = selectEl.value;
+        if (selectEl.value === 'default') {
+            (confirmBtn as HTMLButtonElement).disabled = true;
         } else {
-            btn!.classList.add("pending");
-            (btn as HTMLButtonElement)!.disabled = true;
-            collapseAllPlaylists(playlists);
-            toggleInstructions();
+            (confirmBtn as HTMLButtonElement).disabled = false;
         }
     });
+    transferDialog?.addEventListener('close', async () => {
+        const p = (transferDialog as HTMLDialogElement).returnValue;
+        if (p !== 'default' && p !== 'cancel') {
+            await transferSongs(token, playlists, Number((transferDialog as HTMLDialogElement).returnValue));
+            await refresh(token, playlists, [Number((transferDialog as HTMLDialogElement).returnValue)]);
+        }
+    });
+    confirmBtn?.addEventListener('click', (event) =>  {
+        event.preventDefault();
+        (transferDialog as HTMLDialogElement)?.close(selectEl?.value);
+    })
     return;
 }
 
@@ -194,11 +231,12 @@ export function setUpRefreshButton(token: string, playlists: SimplifiedPlaylist[
     return;
 }
 
-function toggleInstructions() {
-    for (let h2 of document.getElementsByClassName("instruct")) {
-        h2.classList.toggle("hide");
-    }
-}
+// DELETE // 
+// function toggleInstructions() {
+//     for (let h2 of document.getElementsByClassName("instruct")) {
+//         h2.classList.toggle("hide");
+//     }
+// }
 
 function collapseAllPlaylists(playlists: SimplifiedPlaylist[]): void {
     for (let i = 0; i < playlists.length; i++) {
@@ -409,11 +447,11 @@ async function sendDeleteRequest(token: string, pls: SimplifiedPlaylist[], j: nu
     return;
 }
 
-async function refresh(token: string, pls: SimplifiedPlaylist[], inds: number[] = [...Array(pls.length).keys()]): Promise<void> {
-    /* inds holds the indexes of the playlists to operate on.
+async function refresh(token: string, pls: SimplifiedPlaylist[], targetInds: number[] = [...Array(pls.length).keys()]): Promise<void> {
+    /* targetInds holds the indexes of the playlists to operate on.
     If not passed, default to operating on every playlist. */
     let div, n, m, tr;
-    for (let ind of inds) {
+    for (let ind of targetInds) {
         console.log(`refreshing ${pls[ind].name}`);
         div = document.getElementById(`PL${ind}`)?.parentElement;
 

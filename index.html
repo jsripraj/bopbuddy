@@ -30,6 +30,21 @@
     <button id="transferBtn" type="button">Add to playlist</button>
     <button id="deleteBtn" type="button">Delete</button>
     <button id="refreshBtn" type="button">Refresh</button>
+    <dialog id="transferDialog">
+      <form>
+        <p>
+          <label>Move to:
+            <select>
+              <option value="default">Choose playlist...</option>
+            </select>
+          </label>
+        </p>
+        <div>
+          <button value="cancel" formmethod="dialog">Cancel</button>
+          <button id="confBtn" value="default">Confirm</button>
+        </div>
+      </form>
+    </dialog>
     <dialog id="deleteDialog">
       <p>Are you sure you want to delete the selected songs?</p>
       <div>
@@ -38,7 +53,6 @@
       </div>
     </dialog>
     <h2 class="instruct">Choose <span>songs</span> from your playlists</h2>
-    <h2 class="hide instruct">Choose destination <span>playlist</span></h2>
 
     <section id="music">
       <div id="playlists">
