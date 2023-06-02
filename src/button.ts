@@ -22,6 +22,16 @@ function setUpTransferButton(token: string, playlists: SimplifiedPlaylist[]): vo
         selectEl!.innerHTML += `<option value=${pl.index}>${pl.name}</option>`;
     }
     transferBtn?.addEventListener('click', () => {
+        let songWarn = 0;
+        let plWarn = 0;
+        for (const pl of playlists) {
+            if (pl.countSelected > 0) {
+                songWarn += pl.countSelected;
+                plWarn += 1;
+            }
+        }
+        document!.getElementById("transfer-song-warning")!.innerHTML = songWarn.toString();
+        document!.getElementById("transfer-playlist-warning")!.innerHTML = plWarn.toString();
         (transferDialog as HTMLDialogElement)!.showModal();
     });
     selectEl?.addEventListener('change', () => {
@@ -52,6 +62,16 @@ function setUpDeleteButton(token: string, playlists: SimplifiedPlaylist[]): void
     const cancelBtn = document.getElementById("cancelBtn");
     const confirmBtn = document.getElementById("confirmBtn");
     deleteBtn!.addEventListener("click", () => {
+        let songWarn = 0;
+        let plWarn = 0;
+        for (const pl of playlists) {
+            if (pl.countSelected > 0) {
+                songWarn += pl.countSelected;
+                plWarn += 1;
+            }
+        }
+        document!.getElementById("delete-song-warning")!.innerHTML = songWarn.toString();
+        document!.getElementById("delete-playlist-warning")!.innerHTML = plWarn.toString();
         (deleteDialog as HTMLDialogElement)!.showModal();
     });
     cancelBtn?.addEventListener("click", () => {
@@ -63,28 +83,10 @@ function setUpDeleteButton(token: string, playlists: SimplifiedPlaylist[]): void
     });
 }
 
-/*
-export function setUpRefreshButton(token: string, playlists: SimplifiedPlaylist[]): void {
-    const refreshBtn = document.getElementById("refreshBtn");
-    refreshBtn?.addEventListener("click", () => {
-        refresh(token, playlists);
-    });
-    return;
-}
-*/
-
 function setUpSelectAllBtn(token: string, pls: SimplifiedPlaylist[]): void {
     const selectAllBtn = document.getElementById("selectAllBtn");
     selectAllBtn?.addEventListener('click', async () => {
         toggleLoadingCursor();
-        // await expandPlaylists(token, pls);
-        // const trks = document?.getElementsByClassName("track");
-        // if (trks) {
-        //     let id;
-        //     for (const trk of trks) {
-        //         id = getPlaylistID(trk as HTMLElement);
-        //     }
-        // }
         for (const pl of pls) {
             await expandPlaylists(token, [pl]);
             let div = document.getElementById(`PL${pl.index}`)?.parentElement;
@@ -112,12 +114,6 @@ function setUpUnselectAllBtn(pls: SimplifiedPlaylist[]): void {
                 }
             }
         }
-        // const tracks = document?.getElementsByClassName("track");
-        // if (tracks) {
-        //     for (const track of tracks) {
-        //         track.classList.remove('selected');
-        //     }
-        // }
     });
     return;
 }
@@ -194,22 +190,22 @@ async function transferSongs(token: string, playlists: SimplifiedPlaylist[], des
     console.log("called TransferSong");
     toggleLoadingCursor();
     const selectedTracks = document.getElementsByClassName('selected');
-    let found, p, t;
     let uris = [];
     let n = 0;
     for (const track of selectedTracks) {
-        found = track.id.match(/PL(\d+)TR(\d+)/); // track id is of form 'PL#TR#'
-        try {
-            if (found) {
-                p = Number(found[1]);
-                t = Number(found[2]);
-            } else {
-                throw new Error("Unable to identify selected tracks");
-            }
-        } catch(e) {
-            console.error(e);
-            return;
-        }
+        // found = track.id.match(/PL(\d+)TR(\d+)/); // track id is of form 'PL#TR#'
+        // try {
+        //     if (found) {
+        //         p = Number(found[1]);
+        //         t = Number(found[2]);
+        //     } else {
+        //         throw new Error("Unable to identify selected tracks");
+        //     }
+        // } catch(e) {
+        //     console.error(e);
+        //     return;
+        // }
+        const [p, t] = getIndices(track as HTMLElement);
         uris.push(playlists[p].tracks[t].uri);
         n++;
         if (n === selectedTracks.length || n === 100) {
@@ -228,26 +224,20 @@ async function deleteSongs(token: string, playlists: SimplifiedPlaylist[]): Prom
     duplicates, if necessary. */
     toggleLoadingCursor();
     const selected = document.getElementsByClassName('selected');
+    const totalSel = selected.length;
     let i = 0, n = 0;
-    let found: any, p: number, t: number;
+    let p, t;
     let pOld = -1;
     let uris: any[] = []; 
     const needRefresh: number[] = [];
     let dupUris: string[]  = [];
-    while (i < selected.length) {
-        found = selected[i].id.match(/PL(\d+)TR(\d+)/); // track id is of form 'PL#TR#'
-        console.log(found[0]);
-        try {
-            if (found) {
-                p = Number(found[1]);
-                t = Number(found[2]);
-            } else {
-                throw new Error("Unable to identify selected tracks");
-            }
-        } catch(e) {
-            console.error(e);
-            return;
-        }
+    while (i < totalSel) {
+        console.log(`top: selected.length = ${selected.length}`);
+        console.log(`top: n = ${n}`);
+        [p, t] = getIndices(selected[n] as HTMLElement);
+        console.log(`p = ${p}, t = ${t}`);
+        const track = document.getElementById(`PL${p}TR${t}`);
+        unmarkSelected(playlists[p], track as HTMLElement);
         if (p !== pOld) {
             needRefresh.push(p);
         }
@@ -271,8 +261,7 @@ async function deleteSongs(token: string, playlists: SimplifiedPlaylist[]): Prom
         n++;
         pOld = p;
 
-        /* Delete request can only handle 100 songs at a time.
-        Send the request and reset the array */
+        // Delete request can only handle 100 songs at a time.
         if (n === 100) {
             dupUris = getDuplicates(playlists[p], uris);
             await sendDeleteRequest(token, playlists, p, uris);
@@ -285,8 +274,8 @@ async function deleteSongs(token: string, playlists: SimplifiedPlaylist[]): Prom
             continue;
         }
 
-        /* Send a final request once you've traversed all the songs */
-        if (i === selected.length-1) {
+        /* Send the final request once you've traversed all the songs */
+        if (i === totalSel-1) {
             dupUris = getDuplicates(playlists[p], uris);
             await sendDeleteRequest(token, playlists, p, uris);
             if (dupUris.length) {
@@ -294,6 +283,8 @@ async function deleteSongs(token: string, playlists: SimplifiedPlaylist[]): Prom
             }
         }
         i++;
+        console.log(`bottom: i = ${i}`);
+        console.log(`bottom: selected.length = ${selected.length}`);
     }
     await refresh(token, playlists, needRefresh);
     toggleLoadingCursor();
@@ -379,16 +370,21 @@ export function toggleLoadingCursor(): void {
     return;
 }
 
-function getPlaylistID(trTrack: HTMLElement): number {
+function getIndices(trTrack: HTMLElement): [number, number] {
     const id = trTrack.getAttribute("id");
-    const found = id!.match(/PL(\d+)TR\d+/); // track id is of form 'PL#TR#'
-    let p;
+    const found = id!.match(/PL(\d+)TR(\d+)/); // track id is of form 'PL#TR#'
+    let p, t;
     try {
-        if (found) { p = Number(found[1]); }
-        else { throw new Error("Unable to identify selected tracks"); }
+        if (found) { 
+            p = Number(found[1]);
+            t = Number(found[2]);
+        } 
+        else { 
+            throw new Error("Unable to identify selected tracks");
+        }
     } catch(e) {
         console.error(e);
-        return -1
+        return [-1, -1]
     }
-    return p;
+    return [p, t];
 }

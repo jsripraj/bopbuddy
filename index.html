@@ -32,14 +32,14 @@
 
     <button id="transferBtn" class="action-button" type="button">Add to Playlist</button>
     <button id="deleteBtn" class="action-button" type="button">Delete</button>
-    <button id="expandAllBtn" class="action-button" type="button">Expand / Collapse All Playlists</button>
-    <button id="selectAllBtn" class="action-button" type="button">Select All Songs</button>
-    <button id="unselectAllBtn" class="action-button" type="button">Unselect All Songs</button>
+    <button id="expandAllBtn" class="action-button" type="button">Expand / Collapse All</button>
+    <button id="selectAllBtn" class="action-button" type="button">Select All</button>
+    <button id="unselectAllBtn" class="action-button" type="button">Unselect All</button>
     
     <dialog id="transferDialog">
       <form>
         <p>
-          <label>Move to:
+          <label>Move <span id="transfer-song-warning"></span> songs from <span id="transfer-playlist-warning"></span> playlists to:
             <select>
               <option value="default">Choose playlist...</option>
             </select>
@@ -52,7 +52,7 @@
       </form>
     </dialog>
     <dialog id="deleteDialog">
-      <p>Are you sure you want to delete the selected songs?</p>
+      <p><strong>Delete <span id="delete-song-warning"></span> songs from <span id="delete-playlist-warning"></span> playlists?</strong></p>
       <div>
         <button id="cancelBtn">Cancel</button>
         <button id="confirmBtn">Confirm</button>

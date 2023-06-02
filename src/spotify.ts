@@ -80,25 +80,31 @@ export function populateTracks(pl: SimplifiedPlaylist): void {
 
     let newRow;
     let artistNames;
-    for (let i = 0; i < pl.tracks.length; i++) {
-        // Fill in song row
-        newRow = div?.appendChild(document.createElement("tr"));
-        newRow?.setAttribute("id", `PL${pl.index}TR${i}`);
-        newRow?.classList.add("track");
-        if (!div?.classList.contains("expanded-playlist")) {
-            newRow?.classList.add("hide");
-        }
-        newRow!.innerHTML += `<td>${pl.tracks[i].name}</td>`;
-        artistNames = pl.tracks[i].artists.map(x => x.name);
-        newRow!.innerHTML += `<td>${artistNames.join(", ")}`;
+    if (pl.tracks.length) {
+        for (let i = 0; i < pl.tracks.length; i++) {
+            // Fill in song row
+            newRow = div?.appendChild(document.createElement("tr"));
+            newRow?.setAttribute("id", `PL${pl.index}TR${i}`);
+            newRow?.classList.add("track");
+            if (!div?.classList.contains("expanded-playlist")) {
+                newRow?.classList.add("hide");
+            }
+            newRow!.innerHTML += `<td>${pl.tracks[i].name}</td>`;
+            artistNames = pl.tracks[i].artists.map(x => x.name);
+            newRow!.innerHTML += `<td>${artistNames.join(", ")}`;
 
-        // Initialize first row as prior selection for shift-select
-        if (i === 0) {
-            newRow?.classList.add(`PL${pl.index}-prior-selection`);
+            // Initialize first row as prior selection for shift-select
+            if (i === 0) {
+                newRow?.classList.add(`PL${pl.index}-prior-selection`);
+            }
         }
+        setTracksClickHandler(pl);
+    } else { // Playlist is empty
+        const tr = div!.lastElementChild;
+        tr!.innerHTML = `<td>This playlist is empty</td>`;
+        tr?.classList.remove('label');
     }
     pl.populated = true;
-    setTracksClickHandler(pl);
     return;
 }
 
