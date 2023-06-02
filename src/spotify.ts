@@ -49,7 +49,6 @@ export async function fetchTracks(token: string, pl: SimplifiedPlaylist): Promis
 export function populatePlaylists(token: string, playlists: SimplifiedPlaylist[]): void {
     const table = document.getElementById("playlists")?.firstElementChild;
     let row1;
-    let row2;
     let div;
     for (let i = 0; i < playlists.length; i++) {
         // Div for each playlist
@@ -61,12 +60,6 @@ export function populatePlaylists(token: string, playlists: SimplifiedPlaylist[]
         row1?.classList.add("playlist-name");
         row1!.innerHTML += `<th colspan="2"><span>${playlists[i].name}</span></th>`;
 
-        // Row for "Title" and "Artist" captions
-        row2 = div?.appendChild(document.createElement("tr"));
-        row2?.classList.add("hide", "label");
-        row2!.innerHTML += ("<td><strong>Title</strong></td>");
-        row2!.innerHTML += ("<td><strong>Artist</strong></td>");
-
         playlists[i].index = i;
         playlists[i].countSelected = 0;
     }
@@ -77,10 +70,18 @@ export function populatePlaylists(token: string, playlists: SimplifiedPlaylist[]
 export function populateTracks(pl: SimplifiedPlaylist): void {
     console.log(`populating PL${pl.index}`);
     const div = document.getElementById(`PL${pl.index}`)?.parentElement;
-
     let newRow;
     let artistNames;
     if (pl.tracks.length) {
+        // Add row for "Title" and "Artist" labels
+        const labelRow = div?.appendChild(document.createElement("tr"));
+        labelRow?.classList.add("labels");
+        labelRow!.innerHTML += ("<td><strong>Title</strong></td>");
+        labelRow!.innerHTML += ("<td><strong>Artist</strong></td>");
+        if (!div?.classList.contains("expanded-playlist")) {
+            labelRow?.classList.add("hide");
+        }
+
         for (let i = 0; i < pl.tracks.length; i++) {
             // Fill in song row
             newRow = div?.appendChild(document.createElement("tr"));
@@ -100,9 +101,13 @@ export function populateTracks(pl: SimplifiedPlaylist): void {
         }
         setTracksClickHandler(pl);
     } else { // Playlist is empty
-        const tr = div!.lastElementChild;
+        const tr = div!.appendChild(document.createElement("tr"));
         tr!.innerHTML = `<td>This playlist is empty</td>`;
-        tr?.classList.remove('label');
+        tr?.classList.remove('labels');
+        tr?.classList.add('empty-message');
+        if (!div?.classList.contains("expanded-playlist")) {
+            tr?.classList.add("hide");
+        }
     }
     pl.populated = true;
     return;

@@ -32,6 +32,7 @@ function setUpTransferButton(token: string, playlists: SimplifiedPlaylist[]): vo
         }
         document!.getElementById("transfer-song-warning")!.innerHTML = songWarn.toString();
         document!.getElementById("transfer-playlist-warning")!.innerHTML = plWarn.toString();
+        selectEl!.value = 'default';
         (transferDialog as HTMLDialogElement)!.showModal();
     });
     selectEl?.addEventListener('change', () => {
@@ -193,18 +194,6 @@ async function transferSongs(token: string, playlists: SimplifiedPlaylist[], des
     let uris = [];
     let n = 0;
     for (const track of selectedTracks) {
-        // found = track.id.match(/PL(\d+)TR(\d+)/); // track id is of form 'PL#TR#'
-        // try {
-        //     if (found) {
-        //         p = Number(found[1]);
-        //         t = Number(found[2]);
-        //     } else {
-        //         throw new Error("Unable to identify selected tracks");
-        //     }
-        // } catch(e) {
-        //     console.error(e);
-        //     return;
-        // }
         const [p, t] = getIndices(track as HTMLElement);
         uris.push(playlists[p].tracks[t].uri);
         n++;
@@ -219,50 +208,43 @@ async function transferSongs(token: string, playlists: SimplifiedPlaylist[], des
 }
 
 async function deleteSongs(token: string, playlists: SimplifiedPlaylist[]): Promise<void> {
-    /* Note: Spotify API will delete ALL duplicates of a song, even if only one is sent in
-    a delete request. This function handles this adding back the appropriate number of
-    duplicates, if necessary. */
     toggleLoadingCursor();
     const selected = document.getElementsByClassName('selected');
-    const totalSel = selected.length;
-    let i = 0, n = 0;
-    let p, t;
-    let pOld = -1;
+    let [pOld, _] = getIndices(selected[0] as HTMLElement);
+    let n = 0;
     let uris: any[] = []; 
-    const needRefresh: number[] = [];
+    const needRefresh: number[] = [pOld];
     let dupUris: string[]  = [];
-    while (i < totalSel) {
-        console.log(`top: selected.length = ${selected.length}`);
-        console.log(`top: n = ${n}`);
-        [p, t] = getIndices(selected[n] as HTMLElement);
-        console.log(`p = ${p}, t = ${t}`);
+    while (selected.length) {
+        // console.log(`top: selected.length = ${selected.length}`);
+        // console.log(`top: n = ${n}`);
+        let [p, t] = getIndices(selected[0] as HTMLElement);
+        // console.log(`p = ${p}, t = ${t}`);
         const track = document.getElementById(`PL${p}TR${t}`);
         unmarkSelected(playlists[p], track as HTMLElement);
-        if (p !== pOld) {
-            needRefresh.push(p);
-        }
 
         /* Delete request can only handle songs from one playlist at a time.
         If the playlist you're traversing has changed, send and clear out the songs from
         the last playlist, then try again. */
-        if (p !== pOld && i > 0) {
+        if (p !== pOld) {
+            needRefresh.push(p);
             dupUris = getDuplicates(playlists[pOld], uris);
             await sendDeleteRequest(token, playlists, pOld, uris);
             if (dupUris.length) { 
+                /* Spotify API will delete all duplicates of a song in a playlist, regardless of how 
+                many are sent in a delete request. So, re-add duplicates if necessary. */
                 await sendAddRequest(token, playlists[pOld], dupUris);
             }
             uris = []; 
             n = 0;
-            pOld = p;
-            continue;
         }
 
         uris.push({"uri": playlists[p].tracks[t].uri});
         n++;
         pOld = p;
 
-        // Delete request can only handle 100 songs at a time.
-        if (n === 100) {
+        // Send request if 100 song limit or end of selected is reached
+        if (n === 100 || !selected.length) {
             dupUris = getDuplicates(playlists[p], uris);
             await sendDeleteRequest(token, playlists, p, uris);
             if (dupUris.length) {
@@ -270,21 +252,8 @@ async function deleteSongs(token: string, playlists: SimplifiedPlaylist[]): Prom
             }
             uris = [];
             n = 0;
-            i++;
-            continue;
         }
-
-        /* Send the final request once you've traversed all the songs */
-        if (i === totalSel-1) {
-            dupUris = getDuplicates(playlists[p], uris);
-            await sendDeleteRequest(token, playlists, p, uris);
-            if (dupUris.length) {
-                await sendAddRequest(token, playlists[p], dupUris);
-            }
-        }
-        i++;
-        console.log(`bottom: i = ${i}`);
-        console.log(`bottom: selected.length = ${selected.length}`);
+        // console.log(`bottom: selected.length = ${selected.length}`);
     }
     await refresh(token, playlists, needRefresh);
     toggleLoadingCursor();
@@ -335,15 +304,15 @@ function getDuplicates(pl: SimplifiedPlaylist, uriObjs: any[]): string[] {
 
 async function refresh(token: string, pls: SimplifiedPlaylist[], targetInds: number[] = [...Array(pls.length).keys()]): Promise<void> {
     toggleLoadingCursor();
-    /* targetInds holds the indexes of the playlists to operate on.
+    /* targetInds holds the indices of the playlists to operate on.
     If not passed, default to operating on every playlist. */
     let div, n, m, tr;
     for (let ind of targetInds) {
         console.log(`refreshing ${pls[ind].name}`);
         div = document.getElementById(`PL${ind}`)?.parentElement;
 
-        // Delete all div children except for the first (playlist name) and second (column labels) rows
-        n = div!.childElementCount - 2; 
+        // Delete all div children except for the first row containing the playlist name
+        n = div!.childElementCount - 1; 
         for (let i = 0; i < n; i++) {
             tr = div?.lastElementChild;
             m = tr!.childElementCount;
