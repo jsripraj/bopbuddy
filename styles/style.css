@@ -46,20 +46,27 @@ th, td {
     width: 400px;
 }
 
-.expanded-playlist .playlist-name {
-    background: #0072b2;
-}
-
 th span:hover {
     background-color: #0072b2;
+    cursor: pointer;
+}
+
+.label {
+    border-bottom: white solid 2px;
+    cursor: default;
 }
 
 tr.track:not(.selected):hover {
-    background-color: #d55e00;
+    font-weight: bold;
+    background-color: #0072b2;
+}
+
+.selected:hover {
+    font-weight: bold;
 }
 
 .selected {
-    background: #009e73;
+    background-color: #78281f;
 }
 
 .has-selected-child {
@@ -69,16 +76,12 @@ tr.track:not(.selected):hover {
 
 table {
     border-collapse: collapse;
-    cursor: cell;
+    cursor: pointer;
 }
 
 .action-button {
     display: inline-block;
     cursor: pointer;
-}
-
-.label {
-    border-bottom: white solid 2px;
 }
 
 html.loading * {

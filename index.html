@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
-    <title>Spot-Tool | Spotify Web Player's Missing Functionality</title>
+    <title>Spot-Tool | Spotify for Web's Missing Functionality</title>
     <script type="module" src="src/main.ts" defer></script>
     <link href="styles/style.css" rel="stylesheet" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -13,7 +13,8 @@
   <body>
     <img src="images/spotify-logo.webp" \
     alt="Spotify logo: green circle containing three curved lines emanating upwards" />
-    <h1>Manage Your Playlists</h1>
+    <h1>Spot-Tool</h1>
+    <p>Spotify for Web's Missing Functionality</p>
 
     <section id="profile">
       <h2>Logged in as <span id="displayName"></span></h2>
@@ -29,15 +30,11 @@
       -->
     </section>
 
-    <button id="selectAllBtn" class="action-button" type="button">Select All Songs</button>
-    <button id="unselectAllBtn" class="action-button" type="button">Unselect All Songs</button>
-    <button id="expandAllBtn" class="action-button" type="button">Expand / Collapse All Playlists</button>
     <button id="transferBtn" class="action-button" type="button">Add to Playlist</button>
     <button id="deleteBtn" class="action-button" type="button">Delete</button>
-    <!--
-      <button id="refreshBtn" class="action-button" type="button">Refresh</button>
-      <button id="collapseAllBtn" class="action-button" type="button">Collapse All</button>
-    -->
+    <button id="expandAllBtn" class="action-button" type="button">Expand / Collapse All Playlists</button>
+    <button id="selectAllBtn" class="action-button" type="button">Select All Songs</button>
+    <button id="unselectAllBtn" class="action-button" type="button">Unselect All Songs</button>
     
     <dialog id="transferDialog">
       <form>
@@ -61,7 +58,9 @@
         <button id="confirmBtn">Confirm</button>
       </div>
     </dialog>
-    <h2 class="instruct">Choose <span>songs</span> from your playlists</h2>
+    <!--
+      <h2 class="instruct">Choose <span>songs</span> from your playlists</h2>
+    -->
 
     <section id="music">
       <div id="playlists">

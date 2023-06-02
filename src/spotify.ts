@@ -85,7 +85,7 @@ export function populateTracks(pl: SimplifiedPlaylist): void {
         newRow = div?.appendChild(document.createElement("tr"));
         newRow?.setAttribute("id", `PL${pl.index}TR${i}`);
         newRow?.classList.add("track");
-        if (!div?.classList.contains("expanded")) {
+        if (!div?.classList.contains("expanded-playlist")) {
             newRow?.classList.add("hide");
         }
         newRow!.innerHTML += `<td>${pl.tracks[i].name}</td>`;
@@ -216,17 +216,21 @@ export async function sendDeleteRequest(token: string, pls: SimplifiedPlaylist[]
 }
 
 export function markSelected(pl: SimplifiedPlaylist, tr: HTMLElement) {
-    pl.countSelected += 1;
-    tr.classList.add('selected');
-    if (pl.countSelected === 1) {
+    if (!tr.classList.contains('selected')) {
+        pl.countSelected += 1;
+        tr.classList.add('selected');
+    }
+    if (pl.countSelected > 0) {
         tr.parentElement?.firstElementChild?.classList.add('has-selected-child');
     }
     return;
 }
 
 export function unmarkSelected(pl: SimplifiedPlaylist, tr: HTMLElement) {
-    pl.countSelected -= 1;
-    tr.classList.remove('selected');
+    if (tr.classList.contains('selected')) {
+        pl.countSelected -= 1;
+        tr.classList.remove('selected');
+    }
     if (pl.countSelected === 0) {
         tr.parentElement?.firstElementChild?.classList.remove('has-selected-child');
     }

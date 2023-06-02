@@ -125,9 +125,10 @@ function setUpUnselectAllBtn(pls: SimplifiedPlaylist[]): void {
 function setUpExpandAllBtn(token: string, pls: SimplifiedPlaylist[]): void {
     const expandAllBtn = document.getElementById("expandAllBtn");
     expandAllBtn?.addEventListener('click', async () => {
+        toggleLoadingCursor();
         const tbl = document.querySelector('table');
         for (const div of tbl!.children) {
-            if (div.classList.contains('expanded')) {
+            if (div.classList.contains('expanded-playlist')) {
                 collapsePlaylists(pls);
                 break;
             } else {
@@ -135,6 +136,7 @@ function setUpExpandAllBtn(token: string, pls: SimplifiedPlaylist[]): void {
                 break;
             }
         }
+        toggleLoadingCursor();
     });
     return;
 }
@@ -144,7 +146,7 @@ async function expandPlaylists(token: string, pls: SimplifiedPlaylist[]): Promis
     let expanded;
     for (const pl of pls) {
         div = document.getElementById(`PL${pl.index}`)?.parentElement;
-        expanded = div!.classList.contains("expanded");
+        expanded = div!.classList.contains("expanded-playlist");
         if (!expanded) {
             if (pl.populated) {
                 toggleExpandPlaylist(pl);
@@ -169,7 +171,7 @@ function collapsePlaylists(playlists: SimplifiedPlaylist[]): void {
 
 export function toggleExpandPlaylist(pl: SimplifiedPlaylist): void {
     const div = document.getElementById(`PL${pl.index}`)?.parentElement;
-    const expanded = div!.classList.contains("expanded");
+    const expanded = div!.classList.contains("expanded-playlist");
     for (let tr of div!.children) {
         if (tr.classList.contains("playlist-name")) {
             continue;
@@ -181,10 +183,8 @@ export function toggleExpandPlaylist(pl: SimplifiedPlaylist): void {
         }
     }
     if (expanded) {
-        div?.classList.remove("expanded");
         div?.classList.remove("expanded-playlist");
     } else {
-        div?.classList.add("expanded");
         div?.classList.add("expanded-playlist");
     }
     return;
