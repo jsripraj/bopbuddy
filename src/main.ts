@@ -1,6 +1,6 @@
 import { 
     clientId, code, redirectToAuthCodeFlow, getAccessToken, fetchProfile, populateUIprofile
-} from "./auth-user";
+} from "./user.ts";
 
 import {
     fetchPlaylists, populatePlaylists

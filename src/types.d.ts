@@ -48,6 +48,7 @@ interface SimplifiedPlaylist {
     uri: string;
     populated: boolean;
     index: number;
+    countSelected: number;
 }
 
 interface Track {

@@ -1,4 +1,4 @@
-import { toggleExpandPlaylist } from "./button.ts";
+import { toggleExpandPlaylist, toggleLoadingCursor } from "./button.ts";
 
 export async function fetchPlaylists(token: string): Promise<SimplifiedPlaylist[]> {
     const limit = 10;
@@ -59,15 +59,16 @@ export function populatePlaylists(token: string, playlists: SimplifiedPlaylist[]
         row1 = div?.appendChild(document.createElement("tr"));
         row1?.setAttribute("id", `PL${i}`);
         row1?.classList.add("playlist-name");
-        row1!.innerHTML += `<th colspan="2">${playlists[i].name}</th>`;
+        row1!.innerHTML += `<th colspan="2"><span>${playlists[i].name}</span></th>`;
 
         // Row for "Title" and "Artist" captions
         row2 = div?.appendChild(document.createElement("tr"));
-        row2?.classList.add("hide");
+        row2?.classList.add("hide", "label");
         row2!.innerHTML += ("<td><strong>Title</strong></td>");
         row2!.innerHTML += ("<td><strong>Artist</strong></td>");
 
         playlists[i].index = i;
+        playlists[i].countSelected = 0;
     }
     setPlaylistClickHandler(token, playlists);
     return;
@@ -77,10 +78,10 @@ export function populateTracks(pl: SimplifiedPlaylist): void {
     console.log(`populating PL${pl.index}`);
     const div = document.getElementById(`PL${pl.index}`)?.parentElement;
 
-    // Create rows with cells for title and artist
     let newRow;
     let artistNames;
     for (let i = 0; i < pl.tracks.length; i++) {
+        // Fill in song row
         newRow = div?.appendChild(document.createElement("tr"));
         newRow?.setAttribute("id", `PL${pl.index}TR${i}`);
         newRow?.classList.add("track");
@@ -142,17 +143,18 @@ function setTracksClickHandler(pl: SimplifiedPlaylist): void {
                         return;
                     }
                     
+                    // Select all songs between current and prior selection, inclusive
                     const start = (priorPos < curPos ? priorPos : curPos);
                     const end = (priorPos < curPos ? curPos : priorPos);
                     let r;
                     for (let i = start; i <= end; i++) {
                         r = document.getElementById(`PL${pl.index}TR${i}`);
-                        if (!r?.classList.contains('selected')) {
-                            r!.classList.add('selected');
+                        if (r && !r.classList.contains('selected')) {
+                            markSelected(pl, r);
                         }
                     } 
                 } else {
-                    curSel!.classList.toggle('selected');
+                    if (curSel) { toggleSelected(pl, curSel); }
                 }
                 
                 // Update most recent selection
@@ -166,21 +168,11 @@ function setTracksClickHandler(pl: SimplifiedPlaylist): void {
 
 function setPlaylistClickHandler(token: string, playlists: SimplifiedPlaylist[]): void {
     let tr;
-    // let transferBtn;
-    // let oldSelections;
     for (let i = 0; i < playlists.length; i++) {
         tr = document.getElementById(`PL${i}`);
         tr?.addEventListener("click", async function () {
             console.log(playlists[i].name + " click event");
-            // transferBtn = document.getElementById("transferBtn");
-            // if (transferBtn?.classList.contains("pending")) {
-            //     oldSelections = document.getElementsByClassName("selected-playlist");
-            //     for (let old of oldSelections) {
-            //         old.classList.remove("selected-playlist");
-            //     }
-            //     this.classList.add("selected-playlist");
-            //     (transferBtn as HTMLButtonElement).disabled = false;
-            // } else {
+            toggleLoadingCursor();
             if (playlists[i].populated) {
                 toggleExpandPlaylist(playlists[i]);
             } else {
@@ -188,53 +180,11 @@ function setPlaylistClickHandler(token: string, playlists: SimplifiedPlaylist[])
                 populateTracks(playlists[i]); 
                 toggleExpandPlaylist(playlists[i]);
             }
+            toggleLoadingCursor();
         });
     }
 }
 
-///////////////////// OLD VERSION - DELETE ////////////////
-// export function setUpTransferButton(token: string, playlists: SimplifiedPlaylist[]): void {
-//     // console.log("called setUpTransferButton");
-//     const btn = document.getElementById("transferBtn");
-//     btn!.addEventListener("click", async () => {
-//         // the second time user clicks button
-//         if (btn!.classList.contains("pending")) {
-//             const dest = document.getElementsByClassName("selected-playlist")[0] // 1-element array
-//             const found = dest.id.match(/PL(\d+)/); // playlist id is of form 'PL#'
-//             let p: number;
-//             try {
-//                 if (found) {
-//                     p = Number(found[1]);
-//                 } else {
-//                     throw new Error("Error identifying selected playlist");
-//                 }
-//             } catch (e) {
-//                 console.error(e);
-//                 return;
-//             }
-//             await transferSongs(token, playlists, p);
-//             btn!.classList.remove("pending");
-//             toggleInstructions();
-//             dest.classList.remove("selected-playlist");
-//             refresh(token, playlists, [p]);
-
-//         // the first time user clicks button
-//         } else {
-//             btn!.classList.add("pending");
-//             (btn as HTMLButtonElement)!.disabled = true;
-//             collapseAllPlaylists(playlists);
-//             toggleInstructions();
-//         }l
-//     });
-//     return;
-// }
-
-// DELETE // 
-// function toggleInstructions() {
-//     for (let h2 of document.getElementsByClassName("instruct")) {
-//         h2.classList.toggle("hide");
-//     }
-// }
 export async function sendAddRequest(token: string, dest: SimplifiedPlaylist, uris: string[]): Promise<void> {
     console.log(`sending add request`);
     await fetch(`https://api.spotify.com/v1/playlists/${dest.id}/tracks`, {
@@ -262,5 +212,32 @@ export async function sendDeleteRequest(token: string, pls: SimplifiedPlaylist[]
             "tracks": uris
         })
     });
+    return;
+}
+
+export function markSelected(pl: SimplifiedPlaylist, tr: HTMLElement) {
+    pl.countSelected += 1;
+    tr.classList.add('selected');
+    if (pl.countSelected === 1) {
+        tr.parentElement?.firstElementChild?.classList.add('has-selected-child');
+    }
+    return;
+}
+
+export function unmarkSelected(pl: SimplifiedPlaylist, tr: HTMLElement) {
+    pl.countSelected -= 1;
+    tr.classList.remove('selected');
+    if (pl.countSelected === 0) {
+        tr.parentElement?.firstElementChild?.classList.remove('has-selected-child');
+    }
+    return;
+}
+
+export function toggleSelected(pl: SimplifiedPlaylist, tr: HTMLElement) {
+    if (tr.classList.contains('selected')) {
+        unmarkSelected(pl, tr);
+    } else {
+        markSelected(pl, tr);
+    }
     return;
 }
