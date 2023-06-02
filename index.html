@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" id="global">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
@@ -11,30 +11,27 @@
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap" rel="stylesheet">
   </head>
   <body>
-    <img src="images/spotify-logo.webp" \
-    alt="Spotify logo: green circle containing three curved lines emanating upwards" />
-    <h1>Spot-Tool</h1>
-    <p>Spotify for Web's Missing Functionality</p>
+    <div id="header">
+      <div>
+        <img src="images/spotify-logo.webp" \
+        alt="Spotify logo: green circle containing three curved lines emanating upwards" />
+      </div>
+      <div>
+        <h1>Spotoolfy</h1>
+        <p>The Missing Functionality for Spotify Web Player</p>
+      </div>
+      <div>
+        <p>Logged in as <span id="displayName"></span></p>
+      </div>
+    </div>
 
-    <section id="profile">
-      <h2>Logged in as <span id="displayName"></span></h2>
-      <!--
-        <span id="avatar"></span>
-        <ul>
-          <li>User ID: <span id="id"></span></li>
-          <li>Email: <span id="email"></span></li>
-          <li>Spotify URI: <a id="uri" href="#"></a></li>
-          <li>Link: <a id="url" href="#"></a></li>
-          <li>Profile Image: <span id="imgUrl"></span></li>
-        </ul>
-      -->
-    </section>
-
-    <button id="transferBtn" class="action-button" type="button">Add to Playlist</button>
-    <button id="deleteBtn" class="action-button" type="button">Delete</button>
-    <button id="expandAllBtn" class="action-button" type="button">Expand / Collapse All</button>
-    <button id="selectAllBtn" class="action-button" type="button">Select All</button>
-    <button id="unselectAllBtn" class="action-button" type="button">Unselect All</button>
+    <div id="buttons">
+      <button id="transferBtn" class="action-button" type="button">Add to Playlist</button>
+      <button id="deleteBtn" class="action-button" type="button">Delete</button>
+      <button id="expandAllBtn" class="action-button" type="button">Expand / Collapse All</button>
+      <button id="selectAllBtn" class="action-button" type="button">Select All</button>
+      <button id="unselectAllBtn" class="action-button" type="button">Unselect All</button>
+    </div>
     
     <dialog id="transferDialog">
       <form>
@@ -58,9 +55,6 @@
         <button id="confirmBtn">Confirm</button>
       </div>
     </dialog>
-    <!--
-      <h2 class="instruct">Choose <span>songs</span> from your playlists</h2>
-    -->
 
     <section id="music">
       <div id="playlists">

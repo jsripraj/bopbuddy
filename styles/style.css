@@ -10,6 +10,14 @@ html {
     user-select: none; 
 }
 
+#header {
+    display: flex;
+}
+
+#header > div {
+    width: 33%
+}
+
 h1 {
     font-size: 60px;
     text-align: center;
@@ -18,23 +26,21 @@ h1 {
 img {
     display: block;
     margin: 0 auto;
-    width: 300px;
-}
-
-a:link {
-    color:lime;
-}
-
-a:visited {
-    color: green;
-}
-
-a:hover {
-    text-decoration: none;
+    width: 50%;
 }
 
 .hide {
     display: none;
+}
+
+#buttons {
+    display: flex;
+    top: 0%;
+    position: sticky;
+}
+
+button {
+    width: 20%;
 }
 
 th {
@@ -56,13 +62,12 @@ th span:hover {
     cursor: default;
 }
 
-tr.track:not(.selected):hover {
+tr.track:hover {
     font-weight: bold;
-    background-color: #0072b2;
 }
 
-.selected:hover {
-    font-weight: bold;
+tr.track:not(.selected):hover {
+    background-color: #0072b2;
 }
 
 .selected {
@@ -84,6 +89,6 @@ table {
     cursor: pointer;
 }
 
-html.loading * {
+#global.loading * {
     cursor: wait;
 }

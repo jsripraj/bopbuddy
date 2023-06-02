@@ -22,6 +22,7 @@ function setUpTransferButton(token: string, playlists: SimplifiedPlaylist[]): vo
         selectEl!.innerHTML += `<option value=${pl.index}>${pl.name}</option>`;
     }
     transferBtn?.addEventListener('click', () => {
+        if (loading()) { return }
         let songWarn = 0;
         let plWarn = 0;
         for (const pl of playlists) {
@@ -63,6 +64,7 @@ function setUpDeleteButton(token: string, playlists: SimplifiedPlaylist[]): void
     const cancelBtn = document.getElementById("cancelBtn");
     const confirmBtn = document.getElementById("confirmBtn");
     deleteBtn!.addEventListener("click", () => {
+        if (loading()) { return }
         let songWarn = 0;
         let plWarn = 0;
         for (const pl of playlists) {
@@ -87,6 +89,7 @@ function setUpDeleteButton(token: string, playlists: SimplifiedPlaylist[]): void
 function setUpSelectAllBtn(token: string, pls: SimplifiedPlaylist[]): void {
     const selectAllBtn = document.getElementById("selectAllBtn");
     selectAllBtn?.addEventListener('click', async () => {
+        if (loading()) { return }
         toggleLoadingCursor();
         for (const pl of pls) {
             await expandPlaylists(token, [pl]);
@@ -106,6 +109,7 @@ function setUpSelectAllBtn(token: string, pls: SimplifiedPlaylist[]): void {
 function setUpUnselectAllBtn(pls: SimplifiedPlaylist[]): void {
     const selectAllBtn = document.getElementById("unselectAllBtn");
     selectAllBtn?.addEventListener('click', () => {
+        if (loading()) { return }
         for (const pl of pls) {
             let div = document.getElementById(`PL${pl.index}`)?.parentElement;
             let tracks = div?.getElementsByClassName('track');
@@ -122,6 +126,7 @@ function setUpUnselectAllBtn(pls: SimplifiedPlaylist[]): void {
 function setUpExpandAllBtn(token: string, pls: SimplifiedPlaylist[]): void {
     const expandAllBtn = document.getElementById("expandAllBtn");
     expandAllBtn?.addEventListener('click', async () => {
+        if (loading()) { return }
         toggleLoadingCursor();
         const tbl = document.querySelector('table');
         for (const div of tbl!.children) {
@@ -208,8 +213,9 @@ async function transferSongs(token: string, playlists: SimplifiedPlaylist[], des
 }
 
 async function deleteSongs(token: string, playlists: SimplifiedPlaylist[]): Promise<void> {
-    toggleLoadingCursor();
     const selected = document.getElementsByClassName('selected');
+    if (!selected.length) { return; }
+    toggleLoadingCursor();
     let [pOld, _] = getIndices(selected[0] as HTMLElement);
     let n = 0;
     let uris: any[] = []; 
@@ -330,7 +336,7 @@ async function refresh(token: string, pls: SimplifiedPlaylist[], targetInds: num
 }
 
 export function toggleLoadingCursor(): void {
-    const html = document.getElementsByTagName("html")[0];
+    const html = document.getElementById("global");
     if (html!.classList.contains("loading")) {
         html!.classList.remove("loading");
     } else {
@@ -356,4 +362,9 @@ function getIndices(trTrack: HTMLElement): [number, number] {
         return [-1, -1]
     }
     return [p, t];
+}
+
+export function loading(): boolean {
+    const global = document.getElementById("global");
+    return (global?.classList.contains("loading") ? true : false);
 }

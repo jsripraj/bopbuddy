@@ -1,4 +1,4 @@
-import { toggleExpandPlaylist, toggleLoadingCursor } from "./button.ts";
+import { toggleExpandPlaylist, toggleLoadingCursor, loading } from "./button.ts";
 
 export async function fetchPlaylists(token: string): Promise<SimplifiedPlaylist[]> {
     const limit = 10;
@@ -119,6 +119,7 @@ function setTracksClickHandler(pl: SimplifiedPlaylist): void {
     if (tracks) {
         for (const track of tracks) {
             track.addEventListener('click', (ev) => {
+                if (loading()) { return }
                 const curSel = (ev.target as Node)!.parentElement
                 const mark = `PL${pl.index}-prior-selection`;
                 const priorSel = document.getElementsByClassName(mark)[0];
@@ -182,6 +183,7 @@ function setPlaylistClickHandler(token: string, playlists: SimplifiedPlaylist[])
     for (let i = 0; i < playlists.length; i++) {
         tr = document.getElementById(`PL${i}`);
         tr?.addEventListener("click", async function () {
+            if (loading()) { return; }
             console.log(playlists[i].name + " click event");
             toggleLoadingCursor();
             if (playlists[i].populated) {
