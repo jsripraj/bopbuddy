@@ -61,6 +61,61 @@ html {
     font-size: 1.5em;
 }
 
+dialog {
+    font-size: 2em;
+    text-align: center;
+    background-color: white;
+    color: black;
+    border: 6px solid #009e73;
+}
+
+#deleteDialog {
+    border: 6px solid #78281f;
+}
+
+#transfer-span {
+    font-weight: bold;
+    color: #117733;
+}
+
+#delete-span {
+    font-weight: bold;
+    color: #78281f;
+}
+
+dialog select {
+    font-size: 1em;
+    height: max-content;
+}
+
+dialog button {
+    box-sizing: border-box;
+    height: 50px;
+    width: 45%;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 1em;
+    background-color: white;
+    color: black;
+    border: 3px solid #117733;
+}
+
+#deleteDialog button {
+    border: 3px solid #78281f;
+}
+
+#transferDialog button:hover {
+    font-weight: bold;
+    background-color: #117733;
+    color: white;
+}
+
+#deleteDialog button:hover {
+    font-weight: bold;
+    background-color: #78281f;
+    color: white;
+}
+
 table {
     border-collapse: collapse;
     cursor: pointer;
