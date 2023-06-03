@@ -4,29 +4,28 @@ Source: davidmathlogic.com/colorblind */
 
 html {
     background-color: black;
-    font-size: 20px;
+    font-size: 1em;
     font-family: 'Open Sans', sans-serif;
     color: white;
     user-select: none; 
 }
 
-#header {
-    display: flex;
-}
-
-#header > div {
-    width: 33%
-}
-
-h1 {
-    font-size: 60px;
+#header > h1 {
+    font-size: 6em;
     text-align: center;
+    margin-top: .25em;
+    margin-bottom: .25em;
 }
 
-img {
-    display: block;
-    margin: 0 auto;
-    width: 50%;
+#header > h1 > span {
+    color: #009e73;
+}
+
+#header > p {
+    font-size: 2em;
+    text-align: center;
+    margin-top: 0em;
+    margin-bottom: 1.75em;
 }
 
 .hide {
@@ -37,24 +36,57 @@ img {
     display: flex;
     top: 0%;
     position: sticky;
+    height: 60px;
+    margin-bottom: 10px;
 }
 
-button {
+.action-button {
+    display: inline-block;
+    cursor: pointer;
     width: 20%;
+    height: 100%;
+    font-family: inherit;
+    color: white;
+    background-color: black;
+    border: none;
+    border-top: 2px solid #117733; 
+    border-bottom: 2px solid #117733;
+    font-size: 1.25em;
+}
+
+.action-button:hover {
+    background-color: #117733;
+    font-weight: bold;
+    font-size: 1.4em;
 }
 
 th {
     text-align: start;
-    font-size: 1.5em;
+    font-size: 2em;
 }
 
 th, td {
-    width: 400px;
+    width: 50%;
+    padding-right: 1em;
 }
 
-th span:hover {
-    background-color: #0072b2;
+td {
+    font-size: 1.25em;
+}
+
+.playlist-name th:hover {
+    color: #009e73;
     cursor: pointer;
+}
+
+.playlist-name th:hover::after {
+    content: " >";
+    color: #009e73;
+}
+
+.expanded-playlist th:hover::after {
+    content: " <";
+    color: #009e73;
 }
 
 .label {
@@ -62,12 +94,12 @@ th span:hover {
     cursor: default;
 }
 
-tr.track:hover {
+.track:hover {
     font-weight: bold;
 }
 
 tr.track:not(.selected):hover {
-    background-color: #0072b2;
+    background-color: #117733;
 }
 
 .selected {
@@ -81,11 +113,6 @@ tr.track:not(.selected):hover {
 
 table {
     border-collapse: collapse;
-    cursor: pointer;
-}
-
-.action-button {
-    display: inline-block;
     cursor: pointer;
 }
 

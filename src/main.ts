@@ -1,5 +1,5 @@
 import { 
-    clientId, code, redirectToAuthCodeFlow, getAccessToken, fetchProfile, populateUIprofile
+    clientId, code, redirectToAuthCodeFlow, getAccessToken // fetchProfile, populateUIprofile
 } from "./user.ts";
 
 import {
@@ -12,9 +12,9 @@ if (!code) {
     redirectToAuthCodeFlow(clientId);
 } else {
     const accessToken = await getAccessToken(clientId, code);
-    const profile = await fetchProfile(accessToken);
+    // const profile = await fetchProfile(accessToken);
     const playlists = await fetchPlaylists(accessToken);
-    populateUIprofile(profile);
+    // populateUIprofile(profile);
     populatePlaylists(accessToken, playlists);
     setUpButtons(accessToken, playlists);
 }

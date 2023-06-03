@@ -66,9 +66,9 @@ export async function fetchProfile(token: string): Promise<UserProfile> {
     return await result.json();
 }
 
+/*
 export function populateUIprofile(profile: UserProfile) {
     document.getElementById("displayName")!.innerText = profile.display_name;
-    /*
     if (profile.images[0]) {
         const profileImage = new Image(200, 200);
         profileImage.src = profile.images[0].url;
@@ -81,5 +81,5 @@ export function populateUIprofile(profile: UserProfile) {
     document.getElementById("url")!.innerText = profile.href;
     document.getElementById("url")!.setAttribute("href", profile.href);
     document.getElementById("imgUrl")!.innerText = profile.images[0]?.url ?? '(no profile image)';
-    */
 }
+*/

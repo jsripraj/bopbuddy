@@ -12,25 +12,16 @@
   </head>
   <body>
     <div id="header">
-      <div>
-        <img src="images/spotify-logo.webp" \
-        alt="Spotify logo: green circle containing three curved lines emanating upwards" />
-      </div>
-      <div>
-        <h1>Spotoolfy</h1>
-        <p>The Missing Functionality for Spotify Web Player</p>
-      </div>
-      <div>
-        <p>Logged in as <span id="displayName"></span></p>
-      </div>
+      <h1>spotify<span>.tool</span></h1>
+      <p>The Missing Functionality for Spotify Web Player</p>
     </div>
 
     <div id="buttons">
+      <button id="unselectAllBtn" class="action-button" type="button">Unselect All</button>
+      <button id="selectAllBtn" class="action-button" type="button">Select All</button>
+      <button id="expandAllBtn" class="action-button" type="button">Expand / Collapse All</button>
       <button id="transferBtn" class="action-button" type="button">Add to Playlist</button>
       <button id="deleteBtn" class="action-button" type="button">Delete</button>
-      <button id="expandAllBtn" class="action-button" type="button">Expand / Collapse All</button>
-      <button id="selectAllBtn" class="action-button" type="button">Select All</button>
-      <button id="unselectAllBtn" class="action-button" type="button">Unselect All</button>
     </div>
     
     <dialog id="transferDialog">
