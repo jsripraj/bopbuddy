@@ -25,7 +25,9 @@ html {
     font-size: 2em;
     text-align: center;
     margin-top: 0em;
-    margin-bottom: 1.75em;
+    margin-bottom: 0em;
+    padding-bottom: 1.75em;
+    border-bottom: 4px solid #117733;
 }
 
 .hide {
@@ -49,15 +51,19 @@ html {
     color: white;
     background-color: black;
     border: none;
-    border-top: 2px solid #117733; 
-    border-bottom: 2px solid #117733;
+    border-bottom: 4px solid #117733;
     font-size: 1.25em;
 }
 
 .action-button:hover {
     background-color: #117733;
     font-weight: bold;
-    font-size: 1.4em;
+    font-size: 1.5em;
+}
+
+table {
+    border-collapse: collapse;
+    cursor: pointer;
 }
 
 th {
@@ -65,13 +71,17 @@ th {
     font-size: 2em;
 }
 
-th, td {
-    width: 50%;
-    padding-right: 1em;
-}
-
 td {
     font-size: 1.25em;
+}
+
+th, td {
+    padding-right: 1vw;
+    min-width: 49vw;
+    max-width: 49vw;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .playlist-name th:hover {
@@ -109,11 +119,6 @@ tr.track:not(.selected):hover {
 .has-selected-child {
     color: #d55e00;
     font-weight: bold;
-}
-
-table {
-    border-collapse: collapse;
-    cursor: pointer;
 }
 
 #global.loading * {
