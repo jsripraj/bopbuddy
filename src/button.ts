@@ -93,8 +93,8 @@ function setUpSelectAllBtn(token: string, pls: SimplifiedPlaylist[]): void {
         toggleLoadingCursor();
         for (const pl of pls) {
             await expandPlaylists(token, [pl]);
-            let div = document.getElementById(`PL${pl.index}`)?.parentElement;
-            let tracks = div?.getElementsByClassName('track');
+            let plDiv = document.getElementById(`PL${pl.index}`);
+            let tracks = plDiv?.getElementsByClassName('track');
             if (tracks) {
                 for (const tr of tracks) {
                     markSelected(pl, tr as HTMLElement);
@@ -111,8 +111,8 @@ function setUpUnselectAllBtn(pls: SimplifiedPlaylist[]): void {
     selectAllBtn?.addEventListener('click', () => {
         if (loading()) { return }
         for (const pl of pls) {
-            let div = document.getElementById(`PL${pl.index}`)?.parentElement;
-            let tracks = div?.getElementsByClassName('track');
+            let plDiv = document.getElementById(`PL${pl.index}`);
+            let tracks = plDiv?.getElementsByClassName('track');
             if (tracks) {
                 for (const tr of tracks) {
                     unmarkSelected(pl, tr as HTMLElement);
@@ -129,8 +129,8 @@ function setUpExpandAllBtn(token: string, pls: SimplifiedPlaylist[]): void {
         if (loading()) { return }
         toggleLoadingCursor();
         const tbl = document.querySelector('table');
-        for (const div of tbl!.children) {
-            if (div.classList.contains('expanded-playlist')) {
+        for (const plDiv of tbl!.children) {
+            if (plDiv.classList.contains('expanded')) {
                 collapsePlaylists(pls);
                 break;
             } else {
@@ -144,11 +144,9 @@ function setUpExpandAllBtn(token: string, pls: SimplifiedPlaylist[]): void {
 }
 
 async function expandPlaylists(token: string, pls: SimplifiedPlaylist[]): Promise<void> {
-    let div;
-    let expanded;
     for (const pl of pls) {
-        div = document.getElementById(`PL${pl.index}`)?.parentElement;
-        expanded = div!.classList.contains("expanded-playlist");
+        let plDiv = document.getElementById(`PL${pl.index}`);
+        let expanded = plDiv!.classList.contains("expanded");
         if (!expanded) {
             if (pl.populated) {
                 toggleExpandPlaylist(pl);
@@ -164,7 +162,8 @@ async function expandPlaylists(token: string, pls: SimplifiedPlaylist[]): Promis
 
 function collapsePlaylists(playlists: SimplifiedPlaylist[]): void {
     for (let i = 0; i < playlists.length; i++) {
-        if (!document.getElementById(`PL${i}`)?.nextElementSibling?.classList.contains("hide")) {
+        let plDiv = document.getElementById(`PL${i}`);
+        if (plDiv!.classList.contains("expanded")) {
             toggleExpandPlaylist(playlists[i]);
         }
     }
@@ -172,10 +171,21 @@ function collapsePlaylists(playlists: SimplifiedPlaylist[]): void {
 }
 
 export function toggleExpandPlaylist(pl: SimplifiedPlaylist): void {
-    const div = document.getElementById(`PL${pl.index}`)?.parentElement;
-    const expanded = div!.classList.contains("expanded-playlist");
-    for (let tr of div!.children) {
-        if (tr.classList.contains("playlist-name")) {
+    const plDiv = document.getElementById(`PL${pl.index}`);
+    const headerDiv = plDiv?.getElementsByClassName("playlist-header")[0];
+    const expanded = plDiv!.classList.contains("expanded");
+
+    // Toggle labels
+    const labelRow = headerDiv?.getElementsByClassName("labels")[0];
+    if (expanded) {
+        labelRow?.classList.add("hide");
+    } else {
+        labelRow?.classList.remove("hide");
+    }
+
+    // Toggle songs
+    for (let tr of plDiv!.children) {
+        if (tr.classList.contains("playlist-header")) {
             continue;
         }
         if (expanded) {
@@ -184,10 +194,11 @@ export function toggleExpandPlaylist(pl: SimplifiedPlaylist): void {
             tr.classList.remove("hide");
         }
     }
+
     if (expanded) {
-        div?.classList.remove("expanded-playlist");
+        plDiv?.classList.remove("expanded");
     } else {
-        div?.classList.add("expanded-playlist");
+        plDiv?.classList.add("expanded");
     }
     return;
 }
@@ -217,15 +228,11 @@ async function deleteSongs(token: string, playlists: SimplifiedPlaylist[]): Prom
     if (!selected.length) { return; }
     toggleLoadingCursor();
     let [pOld, _] = getIndices(selected[0] as HTMLElement);
+    const needRefresh: number[] = [pOld];
     let n = 0;
     let uris: any[] = []; 
-    const needRefresh: number[] = [pOld];
-    let dupUris: string[]  = [];
     while (selected.length) {
-        // console.log(`top: selected.length = ${selected.length}`);
-        // console.log(`top: n = ${n}`);
         let [p, t] = getIndices(selected[0] as HTMLElement);
-        // console.log(`p = ${p}, t = ${t}`);
         const track = document.getElementById(`PL${p}TR${t}`);
         unmarkSelected(playlists[p], track as HTMLElement);
 
@@ -234,7 +241,7 @@ async function deleteSongs(token: string, playlists: SimplifiedPlaylist[]): Prom
         the last playlist, then try again. */
         if (p !== pOld) {
             needRefresh.push(p);
-            dupUris = getDuplicates(playlists[pOld], uris);
+            let dupUris = getDuplicates(playlists[pOld], uris);
             await sendDeleteRequest(token, playlists, pOld, uris);
             if (dupUris.length) { 
                 /* Spotify API will delete all duplicates of a song in a playlist, regardless of how 
@@ -251,7 +258,7 @@ async function deleteSongs(token: string, playlists: SimplifiedPlaylist[]): Prom
 
         // Send request if 100 song limit or end of selected is reached
         if (n === 100 || !selected.length) {
-            dupUris = getDuplicates(playlists[p], uris);
+            let dupUris = getDuplicates(playlists[p], uris);
             await sendDeleteRequest(token, playlists, p, uris);
             if (dupUris.length) {
                 await sendAddRequest(token, playlists[p], dupUris);
@@ -259,7 +266,6 @@ async function deleteSongs(token: string, playlists: SimplifiedPlaylist[]): Prom
             uris = [];
             n = 0;
         }
-        // console.log(`bottom: selected.length = ${selected.length}`);
     }
     await refresh(token, playlists, needRefresh);
     toggleLoadingCursor();
@@ -282,7 +288,6 @@ function getDuplicates(pl: SimplifiedPlaylist, uriObjs: any[]): string[] {
 
     // count occurences of each song passed in uris
     for (const uriObj of uriObjs) {
-        // console.log(`uri = ${JSON.stringify(uriObj)}`);
         if (Object.hasOwn(m, uriObj.uri)) {
             m[uriObj.uri]++;
         } else {
@@ -293,12 +298,9 @@ function getDuplicates(pl: SimplifiedPlaylist, uriObjs: any[]): string[] {
     /* Calculate how many occurences of each song should remain in pl,
     and return these to be re-added in the calling function (because the
     Spotify API will delete all duplicates). */
-    let remain;
     const reAdd = [];
     for (const uri of Object.keys(m)) {
-        // console.log(`uri = ${uri}`);
-        remain = n[uri] - m[uri];
-        // console.log(`remain = ${remain}`);
+        let remain = n[uri] - m[uri];
         if (remain > 0) {
             for (let i = 0; i < remain; i++) {
                 reAdd.push(uri);
@@ -310,24 +312,23 @@ function getDuplicates(pl: SimplifiedPlaylist, uriObjs: any[]): string[] {
 
 async function refresh(token: string, pls: SimplifiedPlaylist[], targetInds: number[] = [...Array(pls.length).keys()]): Promise<void> {
     toggleLoadingCursor();
+    
     /* targetInds holds the indices of the playlists to operate on.
     If not passed, default to operating on every playlist. */
-    let div, n, m, tr;
     for (let ind of targetInds) {
         console.log(`refreshing ${pls[ind].name}`);
-        div = document.getElementById(`PL${ind}`)?.parentElement;
+        const plDiv = document.getElementById(`PL${ind}`);
 
-        // Delete all div children except for the first row containing the playlist name
-        n = div!.childElementCount - 1; 
-        for (let i = 0; i < n; i++) {
-            tr = div?.lastElementChild;
-            m = tr!.childElementCount;
-            for (let j = 0; j < m; j++) {
-                tr?.lastElementChild?.remove();
+        // Delete all tracks
+        const trackRows = plDiv?.getElementsByClassName("track");
+        while (trackRows?.length) {
+            const tds = trackRows[0].getElementsByTagName("td");
+            for (const td of tds) {
+                td.remove();
             }
-            tr?.remove();
+            trackRows[0].remove();
         }
-
+        
         await fetchTracks(token, pls[ind]);
         populateTracks(pls[ind]);
     }
@@ -345,7 +346,7 @@ export function toggleLoadingCursor(): void {
     return;
 }
 
-function getIndices(trTrack: HTMLElement): [number, number] {
+export function getIndices(trTrack: HTMLElement): [number, number] {
     const id = trTrack.getAttribute("id");
     const found = id!.match(/PL(\d+)TR(\d+)/); // track id is of form 'PL#TR#'
     let p, t;

@@ -1,4 +1,4 @@
-import { toggleExpandPlaylist, toggleLoadingCursor, loading } from "./button.ts";
+import { toggleExpandPlaylist, toggleLoadingCursor, getIndices, loading } from "./button.ts";
 
 export async function fetchPlaylists(token: string): Promise<SimplifiedPlaylist[]> {
     const limit = 10;
@@ -48,17 +48,30 @@ export async function fetchTracks(token: string, pl: SimplifiedPlaylist): Promis
 
 export function populatePlaylists(token: string, playlists: SimplifiedPlaylist[]): void {
     const table = document.getElementById("playlists")?.firstElementChild;
-    let row1;
-    let div;
+    let row;
+    let plDiv;
+    let headerDiv;
     for (let i = 0; i < playlists.length; i++) {
         // Div for each playlist
-        div = table?.appendChild(document.createElement("div"));
+        plDiv = table?.appendChild(document.createElement("div"));
+        plDiv?.classList.add("playlist");
+        plDiv?.setAttribute("id", `PL${i}`);
+
+        // Div for each playlist's header (playlist name and column labels)
+        headerDiv = plDiv!.appendChild(document.createElement("div"));
+        headerDiv.classList.add("playlist-header");
 
         // Row for playlist name
-        row1 = div?.appendChild(document.createElement("tr"));
-        row1?.setAttribute("id", `PL${i}`);
-        row1?.classList.add("playlist-name");
-        row1!.innerHTML += `<th colspan="2"><span>${playlists[i].name}</span></th>`;
+        row = headerDiv?.appendChild(document.createElement("tr"));
+        row?.classList.add("playlist-name");
+        row!.innerHTML += `<th colspan="2"><span>${playlists[i].name}</span></th>`;
+
+        // Row for column labels
+        let labelRow = headerDiv?.appendChild(document.createElement("tr"));
+        labelRow?.classList.add("labels");
+        labelRow!.innerHTML += ("<td><strong>Title</strong></td>");
+        labelRow!.innerHTML += ("<td><strong>Artist</strong></td>");
+        labelRow?.classList.add("hide");
 
         playlists[i].index = i;
         playlists[i].countSelected = 0;
@@ -69,29 +82,27 @@ export function populatePlaylists(token: string, playlists: SimplifiedPlaylist[]
 
 export function populateTracks(pl: SimplifiedPlaylist): void {
     console.log(`populating PL${pl.index}`);
-    const div = document.getElementById(`PL${pl.index}`)?.parentElement;
-    let newRow;
-    let artistNames;
-    if (pl.tracks.length) {
-        // Add row for "Title" and "Artist" labels
-        const labelRow = div?.appendChild(document.createElement("tr"));
-        labelRow?.classList.add("labels");
-        labelRow!.innerHTML += ("<td><strong>Title</strong></td>");
-        labelRow!.innerHTML += ("<td><strong>Artist</strong></td>");
-        if (!div?.classList.contains("expanded-playlist")) {
-            labelRow?.classList.add("hide");
-        }
+    const plDiv = document.getElementById(`PL${pl.index}`);
 
+    // Show/hide labels
+    const labelRow = plDiv?.firstElementChild?.getElementsByClassName("labels")[0];
+    if (plDiv?.classList.contains("expanded")) {
+        labelRow?.classList.remove("hide");
+    } else {
+        labelRow?.classList.add("hide");
+    }
+
+    if (pl.tracks.length) {
         for (let i = 0; i < pl.tracks.length; i++) {
             // Fill in song row
-            newRow = div?.appendChild(document.createElement("tr"));
+            let newRow = plDiv?.appendChild(document.createElement("tr"));
             newRow?.setAttribute("id", `PL${pl.index}TR${i}`);
             newRow?.classList.add("track");
-            if (!div?.classList.contains("expanded-playlist")) {
+            if (!plDiv?.classList.contains("expanded")) {
                 newRow?.classList.add("hide");
             }
             newRow!.innerHTML += `<td>${pl.tracks[i].name}</td>`;
-            artistNames = pl.tracks[i].artists.map(x => x.name);
+            let artistNames = pl.tracks[i].artists.map(x => x.name);
             newRow!.innerHTML += `<td>${artistNames.join(", ")}`;
 
             // Initialize first row as prior selection for shift-select
@@ -101,11 +112,12 @@ export function populateTracks(pl: SimplifiedPlaylist): void {
         }
         setTracksClickHandler(pl);
     } else { // Playlist is empty
-        const tr = div!.appendChild(document.createElement("tr"));
+        const headerDiv = plDiv?.firstElementChild;
+        const tr = headerDiv!.appendChild(document.createElement("tr"));
         tr!.innerHTML = `<td>This playlist is empty</td>`;
         tr?.classList.remove('labels');
         tr?.classList.add('empty-message');
-        if (!div?.classList.contains("expanded-playlist")) {
+        if (!plDiv?.classList.contains("expanded")) {
             tr?.classList.add("hide");
         }
     }
@@ -114,46 +126,20 @@ export function populateTracks(pl: SimplifiedPlaylist): void {
 }
 
 function setTracksClickHandler(pl: SimplifiedPlaylist): void {
-    const div = document.getElementById(`PL${pl.index}`)?.parentElement;
-    const tracks = div?.getElementsByClassName("track");
+    const plDiv = document.getElementById(`PL${pl.index}`);
+    const tracks = plDiv?.getElementsByClassName("track");
     if (tracks) {
         for (const track of tracks) {
             track.addEventListener('click', (ev) => {
                 if (loading()) { return }
-                const curSel = (ev.target as Node)!.parentElement
+                const curSelRow = (ev.target as Node)!.parentElement
                 const mark = `PL${pl.index}-prior-selection`;
-                const priorSel = document.getElementsByClassName(mark)[0];
+                const priorSelRow = document.getElementsByClassName(mark)[0];
 
-                if ((ev as MouseEvent).shiftKey && curSel !== priorSel) {
-                    // Get prior selection's position
-                    const priorID = priorSel.getAttribute("id");
-                    let found = priorID!.match(/PL\d+TR(\d+)/); // track id is of form 'PL#TR#'
-                    let priorPos;
-                    try {
-                        if (found) {
-                            priorPos = Number(found[1]);
-                        } else {
-                            throw new Error("Unable to identify selected tracks");
-                        }
-                    } catch(e) {
-                        console.error(e);
-                        return;
-                    }
-
-                    // Get current selection's position
-                    const curID = curSel!.getAttribute("id");
-                    found = curID!.match(/PL\d+TR(\d+)/); // track id is of form 'PL#TR#'
-                    let curPos;
-                    try {
-                        if (found) {
-                            curPos = Number(found[1]);
-                        } else {
-                            throw new Error("Unable to identify selected tracks");
-                        }
-                    } catch(e) {
-                        console.error(e);
-                        return;
-                    }
+                if ((ev as MouseEvent).shiftKey && curSelRow !== priorSelRow) {
+                    // Get position of current and prior selection
+                    let [_, priorPos] = getIndices(priorSelRow as HTMLElement);
+                    let [__, curPos] = getIndices(curSelRow as HTMLElement);
                     
                     // Select all songs between current and prior selection, inclusive
                     const start = (priorPos < curPos ? priorPos : curPos);
@@ -166,12 +152,12 @@ function setTracksClickHandler(pl: SimplifiedPlaylist): void {
                         }
                     } 
                 } else {
-                    if (curSel) { toggleSelected(pl, curSel); }
+                    if (curSelRow) { toggleSelected(pl, curSelRow); }
                 }
                 
                 // Update most recent selection
-                priorSel.classList.remove(mark);
-                curSel?.classList.add(mark);
+                priorSelRow.classList.remove(mark);
+                curSelRow?.classList.add(mark);
             });
         }
     }
@@ -179,9 +165,10 @@ function setTracksClickHandler(pl: SimplifiedPlaylist): void {
 }
 
 function setPlaylistClickHandler(token: string, playlists: SimplifiedPlaylist[]): void {
-    let tr;
     for (let i = 0; i < playlists.length; i++) {
-        tr = document.getElementById(`PL${i}`);
+        let plDiv = document.getElementById(`PL${i}`);
+        let headerDiv = plDiv?.firstElementChild;
+        let tr = headerDiv?.firstElementChild;
         tr?.addEventListener("click", async function () {
             if (loading()) { return; }
             console.log(playlists[i].name + " click event");
@@ -234,7 +221,8 @@ export function markSelected(pl: SimplifiedPlaylist, tr: HTMLElement) {
         tr.classList.add('selected');
     }
     if (pl.countSelected > 0) {
-        tr.parentElement?.firstElementChild?.classList.add('has-selected-child');
+        const plDiv = tr.parentElement;
+        plDiv?.classList.add('has-selected-child');
     }
     return;
 }
@@ -245,7 +233,8 @@ export function unmarkSelected(pl: SimplifiedPlaylist, tr: HTMLElement) {
         tr.classList.remove('selected');
     }
     if (pl.countSelected === 0) {
-        tr.parentElement?.firstElementChild?.classList.remove('has-selected-child');
+        const plDiv = tr.parentElement;
+        plDiv?.classList.remove('has-selected-child');
     }
     return;
 }

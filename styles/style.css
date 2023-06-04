@@ -2,192 +2,199 @@
 colors from the Wong color palette. 
 Source: davidmathlogic.com/colorblind */
 
-html {
-    background-color: black;
-    font-size: 1em;
-    font-family: 'Open Sans', sans-serif;
-    color: white;
-    user-select: none; 
+@layer base, nav, global;
+
+@layer base {
+    html {
+        background-color: black;
+        font-size: 1em;
+        font-family: 'Open Sans', sans-serif;
+        color: white;
+        user-select: none; 
+    }
+
+    #header > h1 {
+        font-size: 6em;
+        text-align: center;
+        margin-top: .25em;
+        margin-bottom: .25em;
+    }
+
+    #header > h1 > span {
+        color: #009e73;
+    }
+
+    #header > p {
+        font-size: 2em;
+        text-align: center;
+        margin-top: 0em;
+        margin-bottom: 0em;
+        padding-bottom: 1.75em;
+        border-bottom: 4px solid #117733;
+    }
+    table {
+        border-collapse: collapse;
+        cursor: pointer;
+    }
+
+    .playlist-header {
+        background-color: black;
+        top: 60px;
+        height: max-content;
+        position: sticky;
+    }
+
+    .playlist-header > .playlist-name {
+        margin-bottom: 0px;
+    }
+
+    .playlist-header > .labels {
+        border-bottom: white solid 2px;
+        cursor: default;
+    }
+
+    th {
+        text-align: start;
+        font-size: 2em;
+    }
+
+    td {
+        font-size: 1.25em;
+    }
+
+    th, td {
+        padding-right: 1vw;
+        min-width: 49vw;
+        max-width: 49vw;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .playlist-name th:hover {
+        color: #009e73;
+        cursor: pointer;
+    }
+
+    .playlist-name th:hover::after {
+        content: " >";
+        color: #009e73;
+    }
+
+    .expanded th:hover::after {
+        content: " <";
+        color: #009e73;
+    }
+
+    .track:hover {
+        font-weight: bold;
+    }
+
+    tr.track:not(.selected):hover {
+        background-color: #117733;
+    }
+
+    .selected {
+        background-color: #78281f;
+    }
+
+    .has-selected-child .playlist-name {
+        color: #d55e00;
+        font-weight: bold;
+    }
 }
 
-#header > h1 {
-    font-size: 6em;
-    text-align: center;
-    margin-top: .25em;
-    margin-bottom: .25em;
+@layer nav {
+    #buttons {
+        display: flex;
+        top: 0%;
+        position: sticky;
+        height: 60px;
+        margin-bottom: 10px;
+        z-index: 10;
+    }
+
+    .action-button {
+        display: inline-block;
+        cursor: pointer;
+        width: 20%;
+        height: 100%;
+        font-family: inherit;
+        color: white;
+        background-color: black;
+        border: none;
+        border-bottom: 4px solid #117733;
+        font-size: 1.25em;
+    }
+
+    .action-button:hover {
+        background-color: #117733;
+        font-weight: bold;
+        font-size: 1.5em;
+    }
+
+    dialog {
+        font-size: 2em;
+        text-align: center;
+        background-color: white;
+        color: black;
+        border: 6px solid #009e73;
+    }
+
+    #deleteDialog {
+        border: 6px solid #78281f;
+    }
+
+    #transfer-span {
+        font-weight: bold;
+        color: #117733;
+    }
+
+    #delete-span {
+        font-weight: bold;
+        color: #78281f;
+    }
+
+    dialog select {
+        font-size: 1em;
+        height: max-content;
+    }
+
+    dialog button {
+        box-sizing: border-box;
+        height: 50px;
+        width: 45%;
+        cursor: pointer;
+        font-family: inherit;
+        font-size: 1em;
+        background-color: white;
+        color: black;
+        border: 3px solid #117733;
+    }
+
+    #deleteDialog button {
+        border: 3px solid #78281f;
+    }
+
+    #transferDialog button:hover {
+        font-weight: bold;
+        background-color: #117733;
+        color: white;
+    }
+
+    #deleteDialog button:hover {
+        font-weight: bold;
+        background-color: #78281f;
+        color: white;
+    }
 }
 
-#header > h1 > span {
-    color: #009e73;
-}
+@layer global {
+    .hide {
+        display: none;
+    }
 
-#header > p {
-    font-size: 2em;
-    text-align: center;
-    margin-top: 0em;
-    margin-bottom: 0em;
-    padding-bottom: 1.75em;
-    border-bottom: 4px solid #117733;
-}
-
-.hide {
-    display: none;
-}
-
-#buttons {
-    display: flex;
-    top: 0%;
-    position: sticky;
-    height: 60px;
-    margin-bottom: 10px;
-}
-
-.action-button {
-    display: inline-block;
-    cursor: pointer;
-    width: 20%;
-    height: 100%;
-    font-family: inherit;
-    color: white;
-    background-color: black;
-    border: none;
-    border-bottom: 4px solid #117733;
-    font-size: 1.25em;
-}
-
-.action-button:hover {
-    background-color: #117733;
-    font-weight: bold;
-    font-size: 1.5em;
-}
-
-dialog {
-    font-size: 2em;
-    text-align: center;
-    background-color: white;
-    color: black;
-    border: 6px solid #009e73;
-}
-
-#deleteDialog {
-    border: 6px solid #78281f;
-}
-
-#transfer-span {
-    font-weight: bold;
-    color: #117733;
-}
-
-#delete-span {
-    font-weight: bold;
-    color: #78281f;
-}
-
-dialog select {
-    font-size: 1em;
-    height: max-content;
-}
-
-dialog button {
-    box-sizing: border-box;
-    height: 50px;
-    width: 45%;
-    cursor: pointer;
-    font-family: inherit;
-    font-size: 1em;
-    background-color: white;
-    color: black;
-    border: 3px solid #117733;
-}
-
-#deleteDialog button {
-    border: 3px solid #78281f;
-}
-
-#transferDialog button:hover {
-    font-weight: bold;
-    background-color: #117733;
-    color: white;
-}
-
-#deleteDialog button:hover {
-    font-weight: bold;
-    background-color: #78281f;
-    color: white;
-}
-
-table {
-    border-collapse: collapse;
-    cursor: pointer;
-}
-
-.playlist-name {
-    background-color: black;
-    top: 60px;
-    position: sticky;
-    height: 30px;
-    margin-bottom: 0px;
-}
-
-.labels {
-    display: inline-block;
-    border-bottom: white solid 2px;
-    cursor: default;
-    background-color: black;
-    top: 100px;
-    position: sticky;
-}
-
-th {
-    text-align: start;
-    font-size: 2em;
-}
-
-td {
-    font-size: 1.25em;
-}
-
-th, td {
-    padding-right: 1vw;
-    min-width: 49vw;
-    max-width: 49vw;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.playlist-name th:hover {
-    color: #009e73;
-    cursor: pointer;
-}
-
-.playlist-name th:hover::after {
-    content: " >";
-    color: #009e73;
-}
-
-.expanded-playlist th:hover::after {
-    content: " <";
-    color: #009e73;
-}
-
-.track:hover {
-    font-weight: bold;
-}
-
-tr.track:not(.selected):hover {
-    background-color: #117733;
-}
-
-.selected {
-    background-color: #78281f;
-}
-
-.has-selected-child {
-    color: #d55e00;
-    font-weight: bold;
-}
-
-#global.loading * {
-    cursor: wait;
+    #global.loading * {
+        cursor: wait;
+    }
 }
