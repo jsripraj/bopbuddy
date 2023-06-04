@@ -121,6 +121,23 @@ table {
     cursor: pointer;
 }
 
+.playlist-name {
+    background-color: black;
+    top: 60px;
+    position: sticky;
+    height: 30px;
+    margin-bottom: 0px;
+}
+
+.labels {
+    display: inline-block;
+    border-bottom: white solid 2px;
+    cursor: default;
+    background-color: black;
+    top: 100px;
+    position: sticky;
+}
+
 th {
     text-align: start;
     font-size: 2em;
@@ -152,11 +169,6 @@ th, td {
 .expanded-playlist th:hover::after {
     content: " <";
     color: #009e73;
-}
-
-.label {
-    border-bottom: white solid 2px;
-    cursor: default;
 }
 
 .track:hover {
