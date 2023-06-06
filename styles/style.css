@@ -7,14 +7,14 @@ Source: davidmathlogic.com/colorblind */
 @layer base {
     html {
         background-color: black;
-        font-size: 1em;
+        font-size: medium;
         font-family: 'Open Sans', sans-serif;
         color: white;
         user-select: none; 
     }
 
     #header > h1 {
-        font-size: 6em;
+        font-size: 3rem;
         text-align: center;
         margin-top: .25em;
         margin-bottom: .25em;
@@ -25,14 +25,15 @@ Source: davidmathlogic.com/colorblind */
     }
 
     #header > p {
-        font-size: 2em;
+        font-size: 2.5vw;
         text-align: center;
         margin-top: 0em;
         margin-bottom: 0em;
         padding-bottom: 1.75em;
-        border-bottom: 4px solid #117733;
+        border-bottom: .5vw solid #117733;
     }
     table {
+        table-layout: fixed;
         border-collapse: collapse;
         cursor: pointer;
     }
@@ -45,11 +46,13 @@ Source: davidmathlogic.com/colorblind */
     }
 
     .playlist-header > .playlist-name {
+        font-size: 1.5em;
         margin-bottom: 0px;
     }
 
     .playlist-header > .labels {
         border-bottom: white solid 2px;
+        color: lightgray;
         cursor: default;
     }
 
@@ -109,7 +112,7 @@ Source: davidmathlogic.com/colorblind */
         display: flex;
         top: 0%;
         position: sticky;
-        height: 60px;
+        height: 4em;
         margin-bottom: 10px;
         z-index: 10;
     }
@@ -123,8 +126,8 @@ Source: davidmathlogic.com/colorblind */
         color: white;
         background-color: black;
         border: none;
-        border-bottom: 4px solid #117733;
-        font-size: 1.25em;
+        border-bottom: .5vw solid #117733;
+        font-size: 1em;
     }
 
     .action-button:hover {
