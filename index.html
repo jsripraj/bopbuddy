@@ -15,6 +15,38 @@
       <h1>spotify<span>.tool</span></h1>
       <p>The Missing Functionality <span class="avoid-wrap">for Spotify Web Player</span></p>
     </div>
+    
+    <div id="dialogs">
+      <dialog id="transferDialog">
+        <form>
+          <p>
+            <label><span id="transfer-span">Move</span> <strong><span id="transfer-song-warning"></span> songs</strong> from <strong><span id="transfer-playlist-warning"></span> playlists</strong> to:
+              <select>
+                <option value="default">Choose playlist...</option>
+              </select>
+            </label>
+          </p>
+          <div>
+            <button value="cancel" formmethod="dialog">Cancel</button>
+            <button id="confBtn" value="default">Confirm</button>
+          </div>
+        </form>
+      </dialog>
+      <dialog id="deleteDialog">
+        <p><span id="delete-span">Delete</span> <strong><span id="delete-song-warning"></span> songs</strong> from <strong><span id="delete-playlist-warning"></span> playlists</strong>?</p>
+        <div>
+          <button id="cancelBtn">Cancel</button>
+          <button id="confirmBtn">Confirm</button>
+        </div>
+      </dialog>
+    </div>
+
+    <section id="music">
+      <div id="playlists">
+        <table>
+        </table>
+      </div>
+    </section>
 
     <div id="buttons">
       <button id="transferBtn" class="action-button" type="button">Add to Playlist</button>
@@ -24,35 +56,5 @@
       <button id="expandAllBtn" class="action-button" type="button">Expand All</button>
       <button id="collapseAllBtn" class="action-button" type="button">Collapse All</button>
     </div>
-    
-    <dialog id="transferDialog">
-      <form>
-        <p>
-          <label><span id="transfer-span">Move</span> <strong><span id="transfer-song-warning"></span> songs</strong> from <strong><span id="transfer-playlist-warning"></span> playlists</strong> to:
-            <select>
-              <option value="default">Choose playlist...</option>
-            </select>
-          </label>
-        </p>
-        <div>
-          <button value="cancel" formmethod="dialog">Cancel</button>
-          <button id="confBtn" value="default">Confirm</button>
-        </div>
-      </form>
-    </dialog>
-    <dialog id="deleteDialog">
-      <p><span id="delete-span">Delete</span> <strong><span id="delete-song-warning"></span> songs</strong> from <strong><span id="delete-playlist-warning"></span> playlists</strong>?</p>
-      <div>
-        <button id="cancelBtn">Cancel</button>
-        <button id="confirmBtn">Confirm</button>
-      </div>
-    </dialog>
-
-    <section id="music">
-      <div id="playlists">
-        <table>
-        </table>
-      </div>
-    </section>
   </body>
 </html>
