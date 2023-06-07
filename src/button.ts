@@ -8,6 +8,7 @@ export function setUpButtons(token: string, playlists: SimplifiedPlaylist[]): vo
     setUpSelectAllBtn(token, playlists);
     setUpUnselectAllBtn(playlists);
     setUpExpandAllBtn(token, playlists);
+    setUpCollapseAllBtn(playlists);
 }
 
 function setUpTransferButton(token: string, playlists: SimplifiedPlaylist[]): void {
@@ -128,18 +129,18 @@ function setUpExpandAllBtn(token: string, pls: SimplifiedPlaylist[]): void {
     expandAllBtn?.addEventListener('click', async () => {
         if (loading()) { return }
         toggleLoadingCursor();
-        const tbl = document.querySelector('table');
-        for (const plDiv of tbl!.children) {
-            if (plDiv.classList.contains('expanded')) {
-                collapsePlaylists(pls);
-                break;
-            } else {
-                await expandPlaylists(token, pls);
-                break;
-            }
-        }
+        await expandPlaylists(token, pls);
         toggleLoadingCursor();
     });
+    return;
+}
+
+function setUpCollapseAllBtn(pls: SimplifiedPlaylist[]): void {
+    const collapseAllBtn = document.getElementById("collapseAllBtn");
+    collapseAllBtn?.addEventListener('click', () => {
+        if (loading()) { return }
+        collapsePlaylists(pls);
+    })
     return;
 }
 

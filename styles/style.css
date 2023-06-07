@@ -2,19 +2,22 @@
 colors from the Wong color palette. 
 Source: davidmathlogic.com/colorblind */
 
-@layer base, nav, global;
+@layer elements, global;
 
-@layer base {
-    html {
+@layer elements {
+    body {
         background-color: black;
         font-size: medium;
         font-family: 'Open Sans', sans-serif;
         color: white;
         user-select: none; 
+        margin: 0;
     }
 
+    /* Header */
+
     #header > h1 {
-        font-size: 3rem;
+        font-size: min(calc(1rem + 10vw), 8rem);
         text-align: center;
         margin-top: .25em;
         margin-bottom: .25em;
@@ -25,61 +28,149 @@ Source: davidmathlogic.com/colorblind */
     }
 
     #header > p {
-        font-size: 2.5vw;
+        font-size: min(calc(0.3rem + 3vw), 2rem);
         text-align: center;
         margin-top: 0em;
-        margin-bottom: 0em;
-        padding-bottom: 1.75em;
-        border-bottom: .5vw solid #117733;
     }
+
+    span.avoid-wrap {
+        display: inline-block;
+    }
+
+   
+    /* Buttons */
+
+    #buttons {
+        display: flex; 
+        position: sticky;
+        top: 0;
+        margin-top: min(calc(3vw + 0.7rem), 4rem);
+        margin-bottom: 10px;
+        z-index: 10;
+        background-color:#117733;
+        /* border-top: 1px solid gray; */
+        /* border-bottom: 1px solid gray; */
+        height: 50px;
+    }
+
+    .action-button {
+        /* display: inline-block; */
+        flex: 1;
+        /* border-radius: 5px; */
+        cursor: pointer;
+        /* width: 20%; */
+        font-weight: bold;
+        font-family: inherit;
+        color: white;
+        /* background-color: black; */
+        background-color: inherit;
+        border: none;
+        /* border: 2px solid #117733; */
+        /* margin: 5px; */
+        font-size: min(calc(0.3rem + 3vw), 2rem);
+    }
+
+    #collapseAllBtn, #expandAllBtn, #selectAllBtn {
+        display: none;
+    }
+
+    /* Button click animation */
+
+    .action-button:active,
+    dialog button:active {
+        transform: scale(0.95);
+    }
+
+    .track:active,
+    .playlist-name th:active {
+        transform: scale(0.99);
+    }
+    .action-button:active,
+    dialog button:active,
+    .track:active,
+    .playlist-name th:active {
+        filter: brightness(0.9);
+    }
+/* 
+    .action-button:hover {
+        background-color: #117733;
+        font-weight: bold;
+        font-size: 1.5em;
+    } */
+
+
+    /* Table */
+
+    #playlists {
+        margin: 5px;
+    }
+
     table {
+        /* margin-left: 5px; */
         table-layout: fixed;
-        border-collapse: collapse;
+        /* border-collapse: collapse; */
+        width: 100%;
         cursor: pointer;
     }
 
-    .playlist-header {
-        background-color: black;
-        top: 60px;
-        height: max-content;
-        position: sticky;
+    table * {
+        display: block;
     }
 
-    .playlist-header > .playlist-name {
-        font-size: 1.5em;
-        margin-bottom: 0px;
-    }
-
-    .playlist-header > .labels {
-        border-bottom: white solid 2px;
-        color: lightgray;
-        cursor: default;
-    }
-
+    
     th {
         text-align: start;
-        font-size: 2em;
+        font-size: 1.75rem;
     }
 
     td {
         font-size: 1.25em;
     }
 
-    th, td {
-        padding-right: 1vw;
-        min-width: 49vw;
-        max-width: 49vw;
+    td, th span {
+        /* padding-right: 1vw; */
+        /* min-width: 49vw;
+        max-width: 49vw; */
         white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
+        overflow: scroll;
+        /* text-overflow: ellipsis; */
     }
 
-    .playlist-name th:hover {
+    .playlist-header {
+        background-color: black;
+        top: 50px;
+        height: max-content;
+        position: sticky;
+    }
+
+    .expanded .playlist-header {
+        border-bottom: 1px solid gray;
+        color:#009e73;
+    }
+
+    .playlist-header > .playlist-name {
+        /* font-size: 1.5em; */
+        margin-bottom: 0px;
+    }
+
+    .playlist-header > .labels {
+        /* border-bottom: white solid 2px;
+        color: lightgray;
+        cursor: default; */
+        display: none;
+    }
+
+    tr.track td:last-child {
+        font-size: smaller;
+        color: gray;
+    }
+
+    /* .playlist-name th:hover {
         color: #009e73;
         cursor: pointer;
-    }
+    } */
 
-    .playlist-name th:hover::after {
+    /* .playlist-name th:hover::after {
         content: " >";
         color: #009e73;
     }
@@ -95,7 +186,7 @@ Source: davidmathlogic.com/colorblind */
 
     tr.track:not(.selected):hover {
         background-color: #117733;
-    }
+    } */
 
     .selected {
         background-color: #78281f;
@@ -104,36 +195,6 @@ Source: davidmathlogic.com/colorblind */
     .has-selected-child .playlist-name {
         color: #d55e00;
         font-weight: bold;
-    }
-}
-
-@layer nav {
-    #buttons {
-        display: flex;
-        top: 0%;
-        position: sticky;
-        height: 4em;
-        margin-bottom: 10px;
-        z-index: 10;
-    }
-
-    .action-button {
-        display: inline-block;
-        cursor: pointer;
-        width: 20%;
-        height: 100%;
-        font-family: inherit;
-        color: white;
-        background-color: black;
-        border: none;
-        border-bottom: .5vw solid #117733;
-        font-size: 1em;
-    }
-
-    .action-button:hover {
-        background-color: #117733;
-        font-weight: bold;
-        font-size: 1.5em;
     }
 
     dialog {
@@ -179,17 +240,17 @@ Source: davidmathlogic.com/colorblind */
         border: 3px solid #78281f;
     }
 
-    #transferDialog button:hover {
+    /* #transferDialog button:hover {
         font-weight: bold;
         background-color: #117733;
         color: white;
-    }
+    } */
 
-    #deleteDialog button:hover {
+    /* #deleteDialog button:hover {
         font-weight: bold;
         background-color: #78281f;
         color: white;
-    }
+    } */
 }
 
 @layer global {
