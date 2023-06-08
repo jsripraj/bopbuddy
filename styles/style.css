@@ -40,13 +40,14 @@ Source: davidmathlogic.com/colorblind */
    
     /* Buttons */
 
-    #buttons {
+    .button-bar {
         display: flex; 
         width: 100%;
         position: fixed;
         bottom: 0px;
         background-color:#117733;
         height: 50px;
+        z-index: 5;
     }
 
     .action-button {
@@ -78,13 +79,15 @@ Source: davidmathlogic.com/colorblind */
     }
 
     .track:active,
-    .playlist-name th:active {
+    .playlist-name th:active,
+    #transfer-pop-up li:active {
         transform: scale(0.99);
     }
     .action-button:active,
     dialog button:active,
     .track:active,
-    .playlist-name th:active {
+    .playlist-name th:active,
+    #transfer-pop-up li:active {
         filter: brightness(0.9);
     }
 /* 
@@ -93,12 +96,70 @@ Source: davidmathlogic.com/colorblind */
         font-weight: bold;
         font-size: 1.5em;
     } */
+    
 
+    /* Pop-Ups */
+    .pop-up {
+        position: fixed;
+        top: 0;
+        bottom: 50px;
+        width: 100%;
+        height: calc(100vh - 50px);
+        z-index: 10;
+        background-color: black;
+    }
+
+    #transfer-pop-up {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .pop-up h2 {
+        font-weight: normal;
+        text-align: center;
+        flex: 1;
+    }
+
+    #delete-pop-up h2 {
+        position: fixed;
+        bottom: 50px;
+    }
+
+    #transfer-pop-up h2 > span:first-child {
+        color: #009e73;
+        font-weight: bold;
+    }
+
+    #delete-pop-up h2 > span:first-child {
+        color: #ff1900;
+        font-weight: bold;
+    }
+    
+    #transfer-pop-up ul {
+        list-style: none;
+        flex: 12;
+        overflow: scroll;
+        font-size: 1.75rem;
+        padding-inline-start: unset;
+        margin: 5px;
+    }
+
+    #delete-pop-up .button-bar {
+        background-color: #78281f;
+    }
+    
+    .pop-up .button-bar .action-button:first-child {
+        flex: 2;
+    }
+
+
+    
 
     /* Playlists */
 
     #playlists {
         margin: 5px;
+        margin-bottom: 55px;
     }
 
     table {
@@ -188,82 +249,44 @@ Source: davidmathlogic.com/colorblind */
     tr.track:not(.selected):hover {
         background-color: #117733;
     } */
-
-
-    /* Dialogs */
-
-    :modal {
-        position: fixed; 
-        inset-block-start: unset;
-        inset-block-end: 0px;
-        bottom: 50px;
-        text-align: center;
-        background-color: black;
-        color: white;
-        border: none;
-        border-top: 2px solid #117733;
-        height: calc(100% - 50px);
-    }
-
-    dialog div {
-        position: fixed;
-        bottom: 50px;
-    }
-
-    #deleteDialog {
-        border: 6px solid #78281f;
-        border-top: none;
-    }
-
-    #transfer-span {
-        font-weight: bold;
-        color: #117733;
-    }
-
-    #delete-span {
-        font-weight: bold;
-        color: #78281f;
-    }
-
-    dialog select {
-        font-size: 1em;
-    }
-
-    dialog button {
-        box-sizing: border-box;
-        height: 50px;
-        width: 45%;
-        cursor: pointer;
-        font-family: inherit;
-        font-size: 1em;
-        background-color: white;
-        color: black;
-        border: 3px solid #117733;
-    }
-
-    #deleteDialog button {
-        border: 3px solid #78281f;
-    }
-
-    /* #transferDialog button:hover {
-        font-weight: bold;
-        background-color: #117733;
-        color: white;
-    } */
-
-    /* #deleteDialog button:hover {
-        font-weight: bold;
-        background-color: #78281f;
-        color: white;
-    } */
 }
+
 
 @layer global {
     .hide {
         display: none;
     }
 
-    #global.loading * {
+    .loading * {
         cursor: wait;
+        pointer-events: none;
+        touch-action: none;
+        
+    }
+    
+
+    /* Loading animation */
+   
+    #load-animation {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    #loader {
+        position: fixed;
+        top: 40%;
+        z-index: 20;
+        border: 5px solid #009e73;
+        border-top: 5px solid white;
+        border-radius: 50%;
+        width: 60px;
+        height: 60px;
+        animation: spinner 1.5s linear infinite;
+      }
+      
+    @keyframes spinner {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
     }
 }

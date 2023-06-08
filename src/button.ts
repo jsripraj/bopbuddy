@@ -13,57 +13,89 @@ export function setUpButtons(token: string, playlists: SimplifiedPlaylist[]): vo
 
 function setUpTransferButton(token: string, playlists: SimplifiedPlaylist[]): void {
     const transferBtn = document.getElementById("transferBtn");
-    const transferDialog = document.getElementById('transferDialog');
-    const selectEl = transferDialog?.querySelector('select');
-    const confirmBtn = transferDialog?.querySelector('#confBtn');
+    const div = document.getElementById('transfer-pop-up');
+    const ul = div?.querySelector('ul');
+    const confirmBtn = div?.querySelector('#transfer-confirm');
+    const cancelBtn = div?.querySelector('#transfer-cancel');
 
+    // Disable confirm button until a playlist is chosen
     (confirmBtn as HTMLButtonElement).disabled = true;
 
+    // Populate playlist names
     for (const pl of playlists) {
-        selectEl!.innerHTML += `<option value=${pl.index}>${pl.name}</option>`;
+        const li = ul?.appendChild(document.createElement("li"));
+        li!.innerHTML += `${pl.name}`;
+        li?.setAttribute('data-plid', `${pl.index}`);
+        li?.addEventListener('click', () => {
+            if (li.classList.contains('selected')) {
+                li.classList.remove('selected');
+                (confirmBtn as HTMLButtonElement).disabled = true;
+            } else {
+                for (const item of ul!.children) {
+                    if (item.classList.contains('selected')) {
+                        item.classList.remove('selected');
+                        break;
+                    }
+                }
+                li.classList.add('selected');
+                (confirmBtn as HTMLButtonElement).disabled = false;
+            }
+        });
     }
+
+    // On click, show the pop-up
     transferBtn?.addEventListener('click', () => {
         if (loading()) { return }
-        let songWarn = 0;
-        let plWarn = 0;
+        let songCount = 0;
+        let plCount = 0;
         for (const pl of playlists) {
             if (pl.countSelected > 0) {
-                songWarn += pl.countSelected;
-                plWarn += 1;
+                songCount += pl.countSelected;
+                plCount += 1;
             }
         }
-        document!.getElementById("transfer-song-warning")!.innerHTML = songWarn.toString();
-        document!.getElementById("transfer-playlist-warning")!.innerHTML = plWarn.toString();
-        selectEl!.value = 'default';
-        (transferDialog as HTMLDialogElement)!.showModal();
+        document!.getElementById("song-count")!.innerHTML = songCount.toString();
+        document!.getElementById("pl-count")!.innerHTML = plCount.toString();
+        div?.classList.remove('hide');
     });
-    selectEl?.addEventListener('change', () => {
-        (confirmBtn as HTMLButtonElement).value = selectEl.value;
-        if (selectEl.value === 'default') {
-            (confirmBtn as HTMLButtonElement).disabled = true;
-        } else {
-            (confirmBtn as HTMLButtonElement).disabled = false;
+    
+    cancelBtn?.addEventListener('click', () => {
+        // Clear selection
+        for (const item of ul!.children) {
+            if (item.classList.contains('selected')) {
+                item.classList.remove('selected');
+                break;
+            }
         }
+
+        (confirmBtn as HTMLButtonElement).disabled = true;
+        div?.classList.add('hide');
     });
-    transferDialog?.addEventListener('close', async () => {
-        const p = (transferDialog as HTMLDialogElement).returnValue;
-        if (p !== 'default' && p !== 'cancel') {
-            await transferSongs(token, playlists, Number((transferDialog as HTMLDialogElement).returnValue));
-            await refresh(token, playlists, [Number((transferDialog as HTMLDialogElement).returnValue)]);
+
+    confirmBtn?.addEventListener('click', async () =>  {
+        toggleLoading();
+        // Get selection
+        for (const pl of ul!.children) {
+            if (pl.classList.contains('selected')) {
+                pl.classList.remove('selected');
+                const plid = Number((pl as HTMLElement).dataset.plid);
+                await transferSongs(token, playlists, plid);
+                await refresh(token, playlists, [plid]);
+                break;
+            }
         }
-    });
-    confirmBtn?.addEventListener('click', (event) =>  {
-        event.preventDefault();
-        (transferDialog as HTMLDialogElement)?.close(selectEl?.value);
+        (confirmBtn as HTMLButtonElement).disabled = true;
+        div?.classList.add('hide');
+        toggleLoading();
     })
     return;
 }
 
 function setUpDeleteButton(token: string, playlists: SimplifiedPlaylist[]): void {
     const deleteBtn = document.getElementById("deleteBtn");
-    const deleteDialog = document.getElementById("deleteDialog");
-    const cancelBtn = document.getElementById("cancelBtn");
-    const confirmBtn = document.getElementById("confirmBtn");
+    const div = document.getElementById("delete-pop-up");
+    const cancelBtn = document.getElementById("delete-cancel");
+    const confirmBtn = document.getElementById("delete-confirm");
     deleteBtn!.addEventListener("click", () => {
         if (loading()) { return }
         let songWarn = 0;
@@ -74,16 +106,18 @@ function setUpDeleteButton(token: string, playlists: SimplifiedPlaylist[]): void
                 plWarn += 1;
             }
         }
-        document!.getElementById("delete-song-warning")!.innerHTML = songWarn.toString();
-        document!.getElementById("delete-playlist-warning")!.innerHTML = plWarn.toString();
-        (deleteDialog as HTMLDialogElement)!.showModal();
+        document!.getElementById("song-warn")!.innerHTML = songWarn.toString();
+        document!.getElementById("pl-warn")!.innerHTML = plWarn.toString();
+        div?.classList.remove('hide');
     });
+
     cancelBtn?.addEventListener("click", () => {
-        (deleteDialog as HTMLDialogElement)?.close();
+        div?.classList.add('hide');
     });
-    confirmBtn?.addEventListener("click", () => {
-        deleteSongs(token, playlists);
-        (deleteDialog as HTMLDialogElement).close();
+
+    confirmBtn?.addEventListener("click", async () => {
+        await deleteSongs(token, playlists);
+        div?.classList.add('hide');
     });
 }
 
@@ -91,7 +125,7 @@ function setUpSelectAllBtn(token: string, pls: SimplifiedPlaylist[]): void {
     const selectAllBtn = document.getElementById("selectAllBtn");
     selectAllBtn?.addEventListener('click', async () => {
         if (loading()) { return }
-        toggleLoadingCursor();
+        toggleLoading();
         for (const pl of pls) {
             await expandPlaylists(token, [pl]);
             let plDiv = document.getElementById(`PL${pl.index}`);
@@ -102,7 +136,7 @@ function setUpSelectAllBtn(token: string, pls: SimplifiedPlaylist[]): void {
                 }
             }
         }
-        toggleLoadingCursor();
+        toggleLoading();
     });
     return;
 }
@@ -128,9 +162,9 @@ function setUpExpandAllBtn(token: string, pls: SimplifiedPlaylist[]): void {
     const expandAllBtn = document.getElementById("expandAllBtn");
     expandAllBtn?.addEventListener('click', async () => {
         if (loading()) { return }
-        toggleLoadingCursor();
+        toggleLoading();
         await expandPlaylists(token, pls);
-        toggleLoadingCursor();
+        toggleLoading();
     });
     return;
 }
@@ -206,7 +240,7 @@ export function toggleExpandPlaylist(pl: SimplifiedPlaylist): void {
 
 async function transferSongs(token: string, playlists: SimplifiedPlaylist[], dest: number): Promise<void> {
     console.log("called TransferSong");
-    toggleLoadingCursor();
+    toggleLoading();
     const selectedTracks = document.getElementsByClassName('selected');
     let uris = [];
     let n = 0;
@@ -220,14 +254,14 @@ async function transferSongs(token: string, playlists: SimplifiedPlaylist[], des
             n = 0;
         }
     }
-    toggleLoadingCursor();
+    toggleLoading();
     return;
 }
 
 async function deleteSongs(token: string, playlists: SimplifiedPlaylist[]): Promise<void> {
     const selected = document.getElementsByClassName('selected');
     if (!selected.length) { return; }
-    toggleLoadingCursor();
+    toggleLoading();
     let [pOld, _] = getIndices(selected[0] as HTMLElement);
     const needRefresh: number[] = [pOld];
     let n = 0;
@@ -269,7 +303,7 @@ async function deleteSongs(token: string, playlists: SimplifiedPlaylist[]): Prom
         }
     }
     await refresh(token, playlists, needRefresh);
-    toggleLoadingCursor();
+    toggleLoading();
     return;
 }
 
@@ -312,7 +346,7 @@ function getDuplicates(pl: SimplifiedPlaylist, uriObjs: any[]): string[] {
 }
 
 async function refresh(token: string, pls: SimplifiedPlaylist[], targetInds: number[] = [...Array(pls.length).keys()]): Promise<void> {
-    toggleLoadingCursor();
+    toggleLoading();
     
     /* targetInds holds the indices of the playlists to operate on.
     If not passed, default to operating on every playlist. */
@@ -333,16 +367,19 @@ async function refresh(token: string, pls: SimplifiedPlaylist[], targetInds: num
         await fetchTracks(token, pls[ind]);
         populateTracks(pls[ind]);
     }
-    toggleLoadingCursor();
+    toggleLoading();
     return;
 }
 
-export function toggleLoadingCursor(): void {
-    const html = document.getElementById("global");
-    if (html!.classList.contains("loading")) {
-        html!.classList.remove("loading");
+export function toggleLoading(): void {
+    const body = document.querySelector("body");
+    const load = document.getElementById("loader");
+    if (body!.classList.contains("loading")) {
+        body!.classList.remove("loading");
+        load?.classList.add("hide");
     } else {
-        html!.classList.add("loading");
+        body!.classList.add("loading");
+        load?.classList.remove("hide");
     }
     return;
 }

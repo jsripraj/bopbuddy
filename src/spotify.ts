@@ -1,4 +1,4 @@
-import { toggleExpandPlaylist, toggleLoadingCursor, getIndices, loading } from "./button.ts";
+import { toggleExpandPlaylist, toggleLoading, getIndices, loading } from "./button.ts";
 
 export async function fetchPlaylists(token: string): Promise<SimplifiedPlaylist[]> {
     const limit = 10;
@@ -172,7 +172,8 @@ function setPlaylistClickHandler(token: string, playlists: SimplifiedPlaylist[])
         tr?.addEventListener("click", async function () {
             if (loading()) { return; }
             console.log(playlists[i].name + " click event");
-            toggleLoadingCursor();
+            toggleLoading();
+            console.log(`populated = ${playlists[i].populated}`);
             if (playlists[i].populated) {
                 toggleExpandPlaylist(playlists[i]);
             } else {
@@ -180,7 +181,7 @@ function setPlaylistClickHandler(token: string, playlists: SimplifiedPlaylist[])
                 populateTracks(playlists[i]); 
                 toggleExpandPlaylist(playlists[i]);
             }
-            toggleLoadingCursor();
+            toggleLoading();
         });
     }
 }

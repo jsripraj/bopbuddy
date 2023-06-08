@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" id="global">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -10,36 +10,55 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap" rel="stylesheet">
   </head>
+
   <body>
+    <div id="load-animation">
+      <div class="hide" id="loader"></div>
+    </div>
+
     <div id="header">
       <h1>spotify<span>.tool</span></h1>
       <p>The Missing Functionality <span class="avoid-wrap">for Spotify Web Player</span></p>
     </div>
     
-    <div id="dialogs">
-      <dialog id="transferDialog">
-        <form>
-          <p>
-            <label><span id="transfer-span">Move</span> <strong><span id="transfer-song-warning"></span> songs</strong> from <strong><span id="transfer-playlist-warning"></span> playlists</strong> to:
-              <select>
-                <option value="default">Choose playlist...</option>
-              </select>
-            </label>
-          </p>
-          <div>
-            <button value="cancel" formmethod="dialog">Cancel</button>
-            <button id="confBtn" value="default">Confirm</button>
-          </div>
-        </form>
-      </dialog>
-      <dialog id="deleteDialog">
-        <p><span id="delete-span">Delete</span> <strong><span id="delete-song-warning"></span> songs</strong> from <strong><span id="delete-playlist-warning"></span> playlists</strong>?</p>
-        <div>
-          <button id="cancelBtn">Cancel</button>
-          <button id="confirmBtn">Confirm</button>
-        </div>
-      </dialog>
+    <div id="buttons" class="button-bar">
+      <button id="transferBtn" class="action-button" type="button">Add to Playlist</button>
+      <button id="deleteBtn" class="action-button" type="button">Delete</button>
+      <button id="unselectAllBtn" class="action-button" type="button">Unselect All</button>
+      <button id="selectAllBtn" class="action-button" type="button">Select All</button>
+      <button id="expandAllBtn" class="action-button" type="button">Expand All</button>
+      <button id="collapseAllBtn" class="action-button" type="button">Collapse All</button>
     </div>
+
+    <div id="transfer-pop-up" class="pop-up hide">
+      <h2>
+        <span>Move</span> <span id="song-count"></span> songs from <span class="avoid-wrap"><span id="pl-count"></span> playlists</span> to:
+      </h2>
+      <ul>
+      </ul>
+      <div class="button-bar">
+        <button class="action-button" id="transfer-cancel" type="button">Cancel</button>
+        <button class="action-button" id="transfer-confirm" type="button">Confirm</button>
+      </div>
+    </div>
+
+    <div id="delete-pop-up" class="pop-up hide">
+      <h2>
+        <span>Delete</span> <span id="song-warn"></span> songs from <span class="avoid-wrap"><span id="pl-warn"></span> playlists</span>?
+      </h2>
+      <div class="button-bar">
+        <button class="action-button" id="delete-cancel" type="button">Cancel</button>
+        <button class="action-button" id="delete-confirm" type="button">Confirm</button>
+      </div>
+    </div>
+    
+    <dialog id="deleteDialog">
+      <p><span id="delete-span">Delete</span> <strong><span id="delete-song-warning"></span> songs</strong> from <strong><span id="delete-playlist-warning"></span> playlists</strong>?</p>
+      <div>
+        <button id="cancelBtn">Cancel</button>
+        <button id="confirmBtn">Confirm</button>
+      </div>
+    </dialog>
 
     <section id="music">
       <div id="playlists">
@@ -48,13 +67,5 @@
       </div>
     </section>
 
-    <div id="buttons">
-      <button id="transferBtn" class="action-button" type="button">Add to Playlist</button>
-      <button id="deleteBtn" class="action-button" type="button">Delete</button>
-      <button id="unselectAllBtn" class="action-button" type="button">Unselect All</button>
-      <button id="selectAllBtn" class="action-button" type="button">Select All</button>
-      <button id="expandAllBtn" class="action-button" type="button">Expand All</button>
-      <button id="collapseAllBtn" class="action-button" type="button">Collapse All</button>
-    </div>
   </body>
 </html>
