@@ -5,6 +5,14 @@ Source: davidmathlogic.com/colorblind */
 @layer base-mobile, desktop, hover, global;
 
 @layer base-mobile {
+
+    :root {
+        --main-green: #009e73;
+        --background-green: #117733;
+        /* --secondary-color: #F0E442; */
+        --secondary-color: #e69f00;
+    }
+
     body {
         background-color: black;
         font-size: medium;
@@ -24,7 +32,7 @@ Source: davidmathlogic.com/colorblind */
     }
 
     #header > h1 > span {
-        color: #009e73;
+        color: var(--main-green);
     }
 
     #header > p {
@@ -45,7 +53,7 @@ Source: davidmathlogic.com/colorblind */
         width: 100%;
         position: fixed;
         bottom: 0px;
-        background-color:#117733;
+        background-color:var(--background-green);
         height: 50px;
         z-index: 5;
     }
@@ -117,6 +125,7 @@ Source: davidmathlogic.com/colorblind */
     .pop-up h2 {
         box-sizing: border-box;
         font-weight: normal;
+        font-size: 4rem;
         text-align: center;
         margin: 20px;
         flex: 1;
@@ -127,27 +136,29 @@ Source: davidmathlogic.com/colorblind */
         bottom: 50px;
     }
 
-    #transfer-pop-up h2 > span:first-child {
-        color: #009e73;
+    #transfer-pop-up h2 > span:last-child {
+        color: var(--main-green);
         font-weight: bold;
     }
 
     #delete-pop-up h2 > span:first-child {
-        color: #ff1900;
+        color: var(--secondary-color);
         font-weight: bold;
     }
     
     #transfer-pop-up ul {
         list-style: none;
-        flex: 12;
         overflow: scroll;
         font-size: calc(1.75rem + 3vw);
         padding-inline-start: unset;
-        margin: 5px;
     }
 
     #delete-pop-up .button-bar {
-        background-color: #78281f;
+        background-color: var(--secondary-color);
+    }
+
+    #delete-pop-up .button-bar button {
+        color: black;
     }
     
     .pop-up .button-bar .action-button:first-child {
@@ -191,7 +202,7 @@ Source: davidmathlogic.com/colorblind */
     }
 
     .expanded .playlist-header {
-        color:#009e73;
+        color:var(--main-green);
     }
 
     .playlist-header > .playlist-name {
@@ -208,11 +219,11 @@ Source: davidmathlogic.com/colorblind */
     }
 
     .selected {
-        background-color: #78281f;
+        background-color: var(--secondary-color);
     }
 
     .has-selected-child .playlist-name {
-        color: #d55e00;
+        color: var(--secondary-color);
         font-weight: bold;
     }
 }
@@ -223,7 +234,7 @@ Source: davidmathlogic.com/colorblind */
 
         table {
             border-collapse: separate;
-            border-spacing: 25px;
+            border-spacing: 25px 5px;
         }
 
         .playlist-header {
@@ -232,7 +243,7 @@ Source: davidmathlogic.com/colorblind */
         }
 
         .expanded .playlist-header {
-            color:#009e73;
+            color:var(--main-green);
         }
 
         .expanded .playlist-header td {
@@ -246,7 +257,6 @@ Source: davidmathlogic.com/colorblind */
         th, td {
             display: table-cell;
             box-sizing: border-box;
-            /* not causing overwidth */
             max-width: calc(50vw - 65px);
             min-width: calc(50vw - 65px);
         }
@@ -258,11 +268,45 @@ Source: davidmathlogic.com/colorblind */
         td {
             font-size: calc(1rem + 1vw);
             color: white;
+            height: 50px;
+            vertical-align: middle;
         }
 
         th span {
             max-width: 100%;
         }
+
+        .selected {
+            background-color: inherit;
+        }
+
+        li.selected {
+            color:var(--main-green);
+            font-weight: 900;
+        }
+
+        .selected td {
+            color:var(--secondary-color);
+            font-weight: 900;
+        }
+
+        .pop-up h2 {
+            text-align:left;
+        }
+
+        #transfer-pop-up h2 {
+            margin-left: 60px;
+        }
+
+        #delete-pop-up h2 {
+            margin-left: 60px;
+        }
+
+        #transfer-pop-up ul {
+            margin: 0;
+            margin-left: 60px;
+        }
+
     }
 
 }
@@ -311,7 +355,6 @@ Source: davidmathlogic.com/colorblind */
         cursor: wait;
         pointer-events: none;
         touch-action: none;
-        
     }
     
 
@@ -327,8 +370,8 @@ Source: davidmathlogic.com/colorblind */
         position: fixed;
         top: 40%;
         z-index: 20;
-        border: 5px solid #009e73;
-        border-top: 5px solid white;
+        border: 15px solid var(--main-green);
+        border-top: 15px solid var(--secondary-color);
         border-radius: 50%;
         width: 60px;
         height: 60px;
