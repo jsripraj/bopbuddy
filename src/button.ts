@@ -77,7 +77,6 @@ function setUpTransferButton(token: string, playlists: SimplifiedPlaylist[]): vo
     });
 
     confirmBtn?.addEventListener('click', async () =>  {
-        toggleLoading();
         // Get selection
         for (const pl of ul!.children) {
             if (pl.classList.contains('selected')) {
@@ -90,7 +89,6 @@ function setUpTransferButton(token: string, playlists: SimplifiedPlaylist[]): vo
         }
         (confirmBtn as HTMLButtonElement).disabled = true;
         div?.classList.add('hide');
-        toggleLoading();
         behind?.classList.remove('hide');
     })
     return;
@@ -281,12 +279,17 @@ async function transferSongs(token: string, playlists: SimplifiedPlaylist[], des
 async function deleteSongs(token: string, playlists: SimplifiedPlaylist[]): Promise<void> {
     const selected = document.getElementsByClassName('selected');
     if (!selected.length) { return; }
+
+    console.log(`called deleteSongs`);
+
     toggleLoading();
     let [pOld, _] = getIndices(selected[0] as HTMLElement);
     const needRefresh: number[] = [pOld];
-    let n = 0;
     let uris: any[] = []; 
     while (selected.length) {
+
+        console.log(`top of outer while loop. selected.length = ${selected.length}`);
+
         let [p, t] = getIndices(selected[0] as HTMLElement);
         const track = document.getElementById(`PL${p}TR${t}`);
         unmarkSelected(playlists[p], track as HTMLElement);
@@ -297,29 +300,60 @@ async function deleteSongs(token: string, playlists: SimplifiedPlaylist[]): Prom
         if (p !== pOld) {
             needRefresh.push(p);
             let dupUris = getDuplicates(playlists[pOld], uris);
-            await sendDeleteRequest(token, playlists, pOld, uris);
+            let batchCount = 0;
+
+            while (uris.length) {
+                if (batchCount === 100) {
+                    await sendDeleteRequest(token, playlists, pOld, uris.slice(0, batchCount));
+                    uris = uris.slice(batchCount);
+                    batchCount = 0;
+                }
+
+                batchCount++;
+
+                if (batchCount === uris.length) {
+                    await sendDeleteRequest(token, playlists, pOld, uris.slice(0, batchCount));
+                    break;
+                }
+            }
+
+            /* Spotify API will delete all duplicates of a song in a playlist, regardless of how 
+            many are sent in a delete request. So, re-add duplicates if necessary. */
             if (dupUris.length) { 
-                /* Spotify API will delete all duplicates of a song in a playlist, regardless of how 
-                many are sent in a delete request. So, re-add duplicates if necessary. */
                 await sendAddRequest(token, playlists[pOld], dupUris);
             }
+
             uris = []; 
-            n = 0;
         }
 
         uris.push({"uri": playlists[p].tracks[t].uri});
-        n++;
         pOld = p;
 
-        // Send request if 100 song limit or end of selected is reached
-        if (n === 100 || !selected.length) {
+        // You've run out of selected songs. Delete the remaining songs and exit the loop.
+        if (!selected.length) {
             let dupUris = getDuplicates(playlists[p], uris);
-            await sendDeleteRequest(token, playlists, p, uris);
+            let batchCount = 0;
+
+            while (uris.length) {
+                if (batchCount === 100) {
+                    await sendDeleteRequest(token, playlists, p, uris.slice(0, batchCount));
+                    uris = uris.slice(batchCount);
+                    batchCount = 0;
+                }
+
+                batchCount++;
+
+                if (batchCount === uris.length) {
+                    await sendDeleteRequest(token, playlists, p, uris.slice(0, batchCount));
+                    break;
+                }
+            }
+
             if (dupUris.length) {
                 await sendAddRequest(token, playlists[p], dupUris);
             }
-            uris = [];
-            n = 0;
+
+            break;
         }
     }
     await refresh(token, playlists, needRefresh);
@@ -328,11 +362,12 @@ async function deleteSongs(token: string, playlists: SimplifiedPlaylist[]): Prom
 }
 
 function getDuplicates(pl: SimplifiedPlaylist, uriObjs: any[]): string[] {
-    console.log(`getting duplicates`);
+    console.log(`called getDuplicates`);
     let n: any = {};
     let m: any = {};
 
     // count occurences of each song passed in pl
+    // (how many of each song should remain)
     for (const s of pl.tracks) {
         if (Object.hasOwn(n, s.uri)) {
             n[s.uri]++;
@@ -342,6 +377,7 @@ function getDuplicates(pl: SimplifiedPlaylist, uriObjs: any[]): string[] {
     }
 
     // count occurences of each song passed in uris
+    // (how many of each song to delete)
     for (const uriObj of uriObjs) {
         if (Object.hasOwn(m, uriObj.uri)) {
             m[uriObj.uri]++;
@@ -356,10 +392,8 @@ function getDuplicates(pl: SimplifiedPlaylist, uriObjs: any[]): string[] {
     const reAdd = [];
     for (const uri of Object.keys(m)) {
         let remain = n[uri] - m[uri];
-        if (remain > 0) {
-            for (let i = 0; i < remain; i++) {
-                reAdd.push(uri);
-            }
+        for (let i = 0; i < remain; i++) {
+            reAdd.push(uri);
         }
     }
     return reAdd;
@@ -393,13 +427,13 @@ async function refresh(token: string, pls: SimplifiedPlaylist[], targetInds: num
 
 export function toggleLoading(): void {
     const body = document.querySelector("body");
-    const load = document.getElementById("loader");
+    const loader = document.getElementById("loader");
     if (body!.classList.contains("loading")) {
         body!.classList.remove("loading");
-        load?.classList.add("hide");
+        loader?.classList.add("hide");
     } else {
         body!.classList.add("loading");
-        load?.classList.remove("hide");
+        loader?.classList.remove("hide");
     }
     return;
 }

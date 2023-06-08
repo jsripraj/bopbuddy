@@ -86,10 +86,11 @@ export function populateTracks(pl: SimplifiedPlaylist): void {
     const labelRow = plDiv?.firstElementChild?.getElementsByClassName("labels")[0];
     const headerDiv = plDiv?.firstElementChild;
     if (pl.tracks.length) {
-        // Remove empty message if necessary
+        // Remove empty status and empty message if necessary
         for (const child of headerDiv!.children) {
             if (child.classList.contains('empty-message')) {
                 child.remove();
+                plDiv?.classList.remove('empty');
                 break;
             }
         }
@@ -207,7 +208,19 @@ export async function sendAddRequest(token: string, dest: SimplifiedPlaylist, ur
         body: JSON.stringify({
             'uris': uris
         })
-    });
+    }).then(
+        async (val) => {
+           console.log(await val.json());
+        }, 
+        async (err) => {
+            console.error(await err.json());
+        });
+
+    // await res.json()
+    //     .catch((err) => {
+    //         console.error(err);
+    //     });
+
     return;
 }
 
@@ -222,7 +235,14 @@ export async function sendDeleteRequest(token: string, pls: SimplifiedPlaylist[]
         body: JSON.stringify({
             "tracks": uris
         })
-    });
+    }).then(
+        async (val) => {
+            console.log(await val.json());
+        },
+        async (err) => {
+            console.error(await err.json());
+        }
+    )
     return;
 }
 
