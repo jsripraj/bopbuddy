@@ -17,6 +17,7 @@ function setUpTransferButton(token: string, playlists: SimplifiedPlaylist[]): vo
     const ul = div?.querySelector('ul');
     const confirmBtn = div?.querySelector('#transfer-confirm');
     const cancelBtn = div?.querySelector('#transfer-cancel');
+    const behind = document.getElementById('music');
 
     // Disable confirm button until a playlist is chosen
     (confirmBtn as HTMLButtonElement).disabled = true;
@@ -46,6 +47,8 @@ function setUpTransferButton(token: string, playlists: SimplifiedPlaylist[]): vo
     // On click, show the pop-up
     transferBtn?.addEventListener('click', () => {
         if (loading()) { return }
+        behind?.classList.add('hide');
+
         let songCount = 0;
         let plCount = 0;
         for (const pl of playlists) {
@@ -70,6 +73,7 @@ function setUpTransferButton(token: string, playlists: SimplifiedPlaylist[]): vo
 
         (confirmBtn as HTMLButtonElement).disabled = true;
         div?.classList.add('hide');
+        behind?.classList.remove('hide');
     });
 
     confirmBtn?.addEventListener('click', async () =>  {
@@ -87,6 +91,7 @@ function setUpTransferButton(token: string, playlists: SimplifiedPlaylist[]): vo
         (confirmBtn as HTMLButtonElement).disabled = true;
         div?.classList.add('hide');
         toggleLoading();
+        behind?.classList.remove('hide');
     })
     return;
 }
@@ -96,8 +101,12 @@ function setUpDeleteButton(token: string, playlists: SimplifiedPlaylist[]): void
     const div = document.getElementById("delete-pop-up");
     const cancelBtn = document.getElementById("delete-cancel");
     const confirmBtn = document.getElementById("delete-confirm");
+    const behind = document.getElementById('music');
+
     deleteBtn!.addEventListener("click", () => {
         if (loading()) { return }
+        behind?.classList.add('hide');
+
         let songWarn = 0;
         let plWarn = 0;
         for (const pl of playlists) {
@@ -113,11 +122,13 @@ function setUpDeleteButton(token: string, playlists: SimplifiedPlaylist[]): void
 
     cancelBtn?.addEventListener("click", () => {
         div?.classList.add('hide');
+        behind?.classList.remove('hide');
     });
 
     confirmBtn?.addEventListener("click", async () => {
         await deleteSongs(token, playlists);
         div?.classList.add('hide');
+        behind?.classList.remove('hide');
     });
 }
 

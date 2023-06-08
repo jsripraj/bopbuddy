@@ -2,9 +2,9 @@
 colors from the Wong color palette. 
 Source: davidmathlogic.com/colorblind */
 
-@layer elements, global;
+@layer base-mobile, desktop, hover, global;
 
-@layer elements {
+@layer base-mobile {
     body {
         background-color: black;
         font-size: medium;
@@ -55,7 +55,6 @@ Source: davidmathlogic.com/colorblind */
         flex: 1;
         /* border-radius: 5px; */
         cursor: pointer;
-        /* width: 20%; */
         font-weight: bold;
         font-family: inherit;
         color: white;
@@ -99,6 +98,7 @@ Source: davidmathlogic.com/colorblind */
     
 
     /* Pop-Ups */
+
     .pop-up {
         position: fixed;
         top: 0;
@@ -115,8 +115,10 @@ Source: davidmathlogic.com/colorblind */
     }
 
     .pop-up h2 {
+        box-sizing: border-box;
         font-weight: normal;
         text-align: center;
+        margin: 20px;
         flex: 1;
     }
 
@@ -139,7 +141,7 @@ Source: davidmathlogic.com/colorblind */
         list-style: none;
         flex: 12;
         overflow: scroll;
-        font-size: 1.75rem;
+        font-size: calc(1.75rem + 3vw);
         padding-inline-start: unset;
         margin: 5px;
     }
@@ -153,8 +155,6 @@ Source: davidmathlogic.com/colorblind */
     }
 
 
-    
-
     /* Playlists */
 
     #playlists {
@@ -165,7 +165,6 @@ Source: davidmathlogic.com/colorblind */
     table {
         /* margin-left: 5px; */
         table-layout: fixed;
-        /* border-collapse: collapse; */
         width: 100%;
         cursor: pointer;
     }
@@ -174,19 +173,14 @@ Source: davidmathlogic.com/colorblind */
         display: block;
     }
 
-    
     th {
         text-align: start;
-        font-size: 1.75rem;
+        font-size: calc(1.75rem + 3vw);
     }
 
     td, th span {
-        /* padding-right: 1vw; */
-        /* min-width: 49vw;
-        max-width: 49vw; */
         white-space: nowrap;
         overflow: scroll;
-        /* text-overflow: ellipsis; */
     }
 
     .playlist-header {
@@ -197,19 +191,14 @@ Source: davidmathlogic.com/colorblind */
     }
 
     .expanded .playlist-header {
-        border-bottom: 1px solid gray;
         color:#009e73;
     }
 
     .playlist-header > .playlist-name {
-        /* font-size: 1.5em; */
         margin-bottom: 0px;
     }
 
     .playlist-header > .labels {
-        /* border-bottom: white solid 2px;
-        color: lightgray;
-        cursor: default; */
         display: none;
     }
 
@@ -225,6 +214,65 @@ Source: davidmathlogic.com/colorblind */
     .has-selected-child .playlist-name {
         color: #d55e00;
         font-weight: bold;
+    }
+}
+
+@layer desktop {
+
+    @media (min-width: 700px) {
+
+        table {
+            border-collapse: separate;
+            border-spacing: 25px;
+        }
+
+        .playlist-header {
+            display: block;
+            width: 100%;
+        }
+
+        .expanded .playlist-header {
+            color:#009e73;
+        }
+
+        .expanded .playlist-header td {
+            color: gray;
+        }
+        
+        tr {
+            display: table-row;
+        }
+
+        th, td {
+            display: table-cell;
+            box-sizing: border-box;
+            /* not causing overwidth */
+            max-width: calc(50vw - 65px);
+            min-width: calc(50vw - 65px);
+        }
+
+        th {
+            max-width: 100%;
+        }
+        
+        td {
+            font-size: calc(1rem + 1vw);
+            color: white;
+        }
+
+        th span {
+            max-width: 100%;
+        }
+    }
+
+}
+
+@layer hover {
+
+    @media (hover: hover) {
+        .playlist-header > .labels {
+            cursor: default;
+        }
     }
 
     /* .playlist-name th:hover {
@@ -248,11 +296,13 @@ Source: davidmathlogic.com/colorblind */
 
     tr.track:not(.selected):hover {
         background-color: #117733;
-    } */
+    }
+    */
 }
 
 
 @layer global {
+
     .hide {
         display: none;
     }
@@ -289,4 +339,5 @@ Source: davidmathlogic.com/colorblind */
         0% { transform: rotate(0deg); }
         100% { transform: rotate(360deg); }
     }
+
 }
