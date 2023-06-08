@@ -83,16 +83,24 @@ export function populatePlaylists(token: string, playlists: SimplifiedPlaylist[]
 export function populateTracks(pl: SimplifiedPlaylist): void {
     console.log(`populating PL${pl.index}`);
     const plDiv = document.getElementById(`PL${pl.index}`);
-
-    // Show/hide labels
     const labelRow = plDiv?.firstElementChild?.getElementsByClassName("labels")[0];
-    if (plDiv?.classList.contains("expanded")) {
-        labelRow?.classList.remove("hide");
-    } else {
-        labelRow?.classList.add("hide");
-    }
-
+    const headerDiv = plDiv?.firstElementChild;
     if (pl.tracks.length) {
+        // Remove empty message if necessary
+        for (const child of headerDiv!.children) {
+            if (child.classList.contains('empty-message')) {
+                child.remove();
+                break;
+            }
+        }
+
+        // Show/hide labels
+        if (plDiv?.classList.contains("expanded")) {
+            labelRow?.classList.remove("hide");
+        } else {
+            labelRow?.classList.add("hide");
+        }
+
         for (let i = 0; i < pl.tracks.length; i++) {
             // Fill in song row
             let newRow = plDiv?.appendChild(document.createElement("tr"));
@@ -111,11 +119,13 @@ export function populateTracks(pl: SimplifiedPlaylist): void {
             }
         }
         setTracksClickHandler(pl);
+
     } else { // Playlist is empty
-        const headerDiv = plDiv?.firstElementChild;
         const tr = headerDiv!.appendChild(document.createElement("tr"));
+
+        plDiv?.classList.add('empty');
+        labelRow?.classList.add('hide');
         tr!.innerHTML = `<td>This playlist is empty</td>`;
-        tr?.classList.remove('labels');
         tr?.classList.add('empty-message');
         if (!plDiv?.classList.contains("expanded")) {
             tr?.classList.add("hide");
@@ -177,9 +187,9 @@ function setPlaylistClickHandler(token: string, playlists: SimplifiedPlaylist[])
             if (playlists[i].populated) {
                 toggleExpandPlaylist(playlists[i]);
             } else {
+                toggleExpandPlaylist(playlists[i]);
                 await fetchTracks(token, playlists[i]);
                 populateTracks(playlists[i]); 
-                toggleExpandPlaylist(playlists[i]);
             }
             toggleLoading();
         });

@@ -221,12 +221,21 @@ export function toggleExpandPlaylist(pl: SimplifiedPlaylist): void {
     const headerDiv = plDiv?.getElementsByClassName("playlist-header")[0];
     const expanded = plDiv!.classList.contains("expanded");
 
-    // Toggle labels
-    const labelRow = headerDiv?.getElementsByClassName("labels")[0];
-    if (expanded) {
-        labelRow?.classList.add("hide");
+    if (plDiv?.classList.contains('empty')) {
+        const emptyMsgRow = headerDiv?.getElementsByClassName('empty-message')[0];
+        if (expanded) {
+            emptyMsgRow?.classList.add('hide');
+        } else {
+            emptyMsgRow?.classList.remove('hide');
+        }
     } else {
-        labelRow?.classList.remove("hide");
+        // Toggle labels
+        const labelRow = headerDiv?.getElementsByClassName("labels")[0];
+        if (expanded) {
+            labelRow?.classList.add("hide");
+        } else {
+            labelRow?.classList.remove("hide");
+        }
     }
 
     // Toggle songs
