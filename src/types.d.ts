@@ -61,6 +61,7 @@ interface Track {
     popularity: number;
     type: string;
     uri: string;
+    is_local: boolean;
 }
 
 interface Artist {

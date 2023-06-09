@@ -24,23 +24,23 @@ export async function fetchTracks(token: string, pl: SimplifiedPlaylist): Promis
     // console.log(`called fetchTracks on PL${pl.index}`);
     pl.tracks = [];
     let offset = 0;
-    let result;
-    let rj;
     while (true) {
-        result = await fetch(`https://api.spotify.com/v1/playlists/${pl.id}/tracks?offset=${offset}`, {
+        let res = await fetch(`https://api.spotify.com/v1/playlists/${pl.id}/tracks?offset=${offset}`, {
             method: "GET", 
             headers: { Authorization: `Bearer ${token}`},
         });
-        rj = await result.json();
-        if (rj.items.length === 0 ) {
+        let result = await res.json();
+        if (result.items.length === 0 ) {
             return;
         } else {
-            for (let item of rj.items) {
-                pl.tracks.push(item.track);
+            for (let item of result.items) {
+                if (!item.track.is_local) {
+                    pl.tracks.push(item.track);
+                }
             }
-            offset += rj.items.length;
+            offset += result.items.length;
         }
-        if (offset >= rj.total) {
+        if (offset >= result.total) {
             return;
         }
     } 
@@ -48,21 +48,18 @@ export async function fetchTracks(token: string, pl: SimplifiedPlaylist): Promis
 
 export function populatePlaylists(token: string, playlists: SimplifiedPlaylist[]): void {
     const table = document.getElementById("playlists")?.firstElementChild;
-    let row;
-    let plDiv;
-    let headerDiv;
     for (let i = 0; i < playlists.length; i++) {
         // Div for each playlist
-        plDiv = table?.appendChild(document.createElement("div"));
+        let plDiv = table?.appendChild(document.createElement("div"));
         plDiv?.classList.add("playlist");
         plDiv?.setAttribute("id", `PL${i}`);
 
         // Div for each playlist's header (playlist name and column labels)
-        headerDiv = plDiv!.appendChild(document.createElement("div"));
+        let headerDiv = plDiv!.appendChild(document.createElement("div"));
         headerDiv.classList.add("playlist-header");
 
         // Row for playlist name
-        row = headerDiv?.appendChild(document.createElement("tr"));
+        let row = headerDiv?.appendChild(document.createElement("tr"));
         row?.classList.add("playlist-name");
         row!.innerHTML += `<th colspan="2"><span>${playlists[i].name}</span></th>`;
 
@@ -75,6 +72,8 @@ export function populatePlaylists(token: string, playlists: SimplifiedPlaylist[]
 
         playlists[i].index = i;
         playlists[i].countSelected = 0;
+        playlists[i].populated = false;
+
     }
     setPlaylistClickHandler(token, playlists);
     return;
@@ -184,7 +183,7 @@ function setPlaylistClickHandler(token: string, playlists: SimplifiedPlaylist[])
             if (loading()) { return; }
             console.log(playlists[i].name + " click event");
             toggleLoading();
-            console.log(`populated = ${playlists[i].populated}`);
+            // console.log(`populated = ${playlists[i].populated}`);
             if (playlists[i].populated) {
                 toggleExpandPlaylist(playlists[i]);
             } else {
@@ -198,7 +197,6 @@ function setPlaylistClickHandler(token: string, playlists: SimplifiedPlaylist[])
 }
 
 export async function sendAddRequest(token: string, dest: SimplifiedPlaylist, uris: string[]): Promise<void> {
-    console.log(`sending add request`);
     await fetch(`https://api.spotify.com/v1/playlists/${dest.id}/tracks`, {
         method: "POST",
         headers: {
@@ -216,16 +214,10 @@ export async function sendAddRequest(token: string, dest: SimplifiedPlaylist, ur
             console.error(await err.json());
         });
 
-    // await res.json()
-    //     .catch((err) => {
-    //         console.error(err);
-    //     });
-
     return;
 }
 
 export async function sendDeleteRequest(token: string, pls: SimplifiedPlaylist[], j: number, uris: Object[]): Promise<void> {
-    console.log(`sending delete request`);
     await fetch(`https://api.spotify.com/v1/playlists/${pls[j].id}/tracks`, {
         method: "DELETE", 
         headers: {

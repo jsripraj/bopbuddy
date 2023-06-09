@@ -266,10 +266,9 @@ async function transferSongs(token: string, playlists: SimplifiedPlaylist[], des
         const [p, t] = getIndices(track as HTMLElement);
         uris.push(playlists[p].tracks[t].uri);
         n++;
-        if (n === selectedTracks.length || n === 100) {
+        if (n === selectedTracks.length || (n % 100) === 0) {
             await sendAddRequest(token, playlists[dest], uris);
             uris = [];
-            n = 0;
         }
     }
     toggleLoading();
@@ -286,10 +285,8 @@ async function deleteSongs(token: string, playlists: SimplifiedPlaylist[]): Prom
     let [pOld, _] = getIndices(selected[0] as HTMLElement);
     const needRefresh: number[] = [pOld];
     let uris: any[] = []; 
+
     while (selected.length) {
-
-        console.log(`top of outer while loop. selected.length = ${selected.length}`);
-
         let [p, t] = getIndices(selected[0] as HTMLElement);
         const track = document.getElementById(`PL${p}TR${t}`);
         unmarkSelected(playlists[p], track as HTMLElement);
@@ -362,7 +359,6 @@ async function deleteSongs(token: string, playlists: SimplifiedPlaylist[]): Prom
 }
 
 function getDuplicates(pl: SimplifiedPlaylist, uriObjs: any[]): string[] {
-    console.log(`called getDuplicates`);
     let n: any = {};
     let m: any = {};
 

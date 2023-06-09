@@ -266,7 +266,7 @@ Source: davidmathlogic.com/colorblind */
         }
         
         td {
-            font-size: calc(1rem + 1vw);
+            font-size: calc(1rem + 2vw);
             color: white;
             height: 50px;
             vertical-align: middle;
