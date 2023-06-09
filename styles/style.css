@@ -9,8 +9,8 @@ Source: davidmathlogic.com/colorblind */
     :root {
         --main-green: #009e73;
         --background-green: #117733;
-        /* --secondary-color: #F0E442; */
         --secondary-color: #e69f00;
+        --secondary-color-mobile: rgba(230,159,0,0.3);
     }
 
     body {
@@ -54,23 +54,18 @@ Source: davidmathlogic.com/colorblind */
         position: fixed;
         bottom: 0px;
         background-color:var(--background-green);
-        height: 50px;
+        height: calc(45px + 2vh);
         z-index: 5;
     }
 
     .action-button {
-        /* display: inline-block; */
         flex: 1;
-        /* border-radius: 5px; */
         cursor: pointer;
         font-weight: bold;
         font-family: inherit;
         color: white;
-        /* background-color: black; */
         background-color: inherit;
         border: none;
-        /* border: 2px solid #117733; */
-        /* margin: 5px; */
         font-size: min(calc(0.3rem + 3vw), 2rem);
     }
 
@@ -97,13 +92,7 @@ Source: davidmathlogic.com/colorblind */
     #transfer-pop-up li:active {
         filter: brightness(0.9);
     }
-/* 
-    .action-button:hover {
-        background-color: #117733;
-        font-weight: bold;
-        font-size: 1.5em;
-    } */
-    
+
 
     /* Pop-Ups */
 
@@ -112,9 +101,11 @@ Source: davidmathlogic.com/colorblind */
         top: 0;
         bottom: 50px;
         width: 100%;
-        height: calc(100vh - 50px);
+        height: calc(98vh - 45px); /* height of button bar: calc(45px + 2vh); */
         z-index: 10;
         background-color: black;
+        display: flex;
+        flex-direction: column;
     }
 
     #transfer-pop-up {
@@ -125,15 +116,17 @@ Source: davidmathlogic.com/colorblind */
     .pop-up h2 {
         box-sizing: border-box;
         font-weight: normal;
-        font-size: 4rem;
+        font-size: calc(2.5rem + 3vmin);
         text-align: center;
         margin: 20px;
         flex: 1;
     }
 
-    #delete-pop-up h2 {
-        position: fixed;
-        bottom: 50px;
+    #delete-pop-up div:first-child {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
 
     #transfer-pop-up h2 > span:last-child {
@@ -151,6 +144,12 @@ Source: davidmathlogic.com/colorblind */
         overflow: scroll;
         font-size: calc(1.75rem + 3vw);
         padding-inline-start: unset;
+        margin-block-start: 0;
+        margin-inline: 20px 20px;
+    }
+
+    #transfer-pop-up .selected {
+        background-color: var(--background-green);
     }
 
     #delete-pop-up .button-bar {
@@ -170,11 +169,10 @@ Source: davidmathlogic.com/colorblind */
 
     #playlists {
         margin: 5px;
-        margin-bottom: 55px;
+        margin-bottom: calc(45px + 2vh); /* height of button bar: calc(45px + 2vh); */
     }
 
     table {
-        /* margin-left: 5px; */
         table-layout: fixed;
         width: 100%;
         cursor: pointer;
@@ -205,6 +203,10 @@ Source: davidmathlogic.com/colorblind */
         color:var(--main-green);
     }
 
+    .playlist-header td {
+        color: gray;
+    }
+
     .playlist-header > .playlist-name {
         margin-bottom: 0px;
     }
@@ -214,12 +216,16 @@ Source: davidmathlogic.com/colorblind */
     }
 
     tr.track td:last-child {
-        font-size: smaller;
+        font-size: 1rem;
         color: gray;
     }
 
+    tr.track td:first-child {
+        font-size: 1.4rem;
+    }
+
     .selected {
-        background-color: var(--secondary-color);
+        background-color: var(--secondary-color-mobile);
     }
 
     .has-selected-child .playlist-name {
@@ -231,6 +237,10 @@ Source: davidmathlogic.com/colorblind */
 @layer desktop {
 
     @media (min-width: 700px) {
+
+        #playlists {
+            margin-bottom: 70px;
+        }
 
         table {
             border-collapse: separate;
@@ -266,7 +276,7 @@ Source: davidmathlogic.com/colorblind */
         }
         
         td {
-            font-size: calc(1rem + 2vw);
+            font-size: calc(1rem + 2vmin);
             color: white;
             height: 50px;
             vertical-align: middle;
@@ -290,15 +300,11 @@ Source: davidmathlogic.com/colorblind */
             font-weight: 900;
         }
 
-        .pop-up h2 {
+        #transfer-pop-up h2 {
             text-align:left;
         }
 
         #transfer-pop-up h2 {
-            margin-left: 60px;
-        }
-
-        #delete-pop-up h2 {
             margin-left: 60px;
         }
 
@@ -307,6 +313,9 @@ Source: davidmathlogic.com/colorblind */
             margin-left: 60px;
         }
 
+        .button-bar {
+            height: 65px;
+        }
     }
 
 }
@@ -314,34 +323,68 @@ Source: davidmathlogic.com/colorblind */
 @layer hover {
 
     @media (hover: hover) {
+        table {
+            border-spacing: 25px 0px;
+        }
+        
+        td {
+            height: 30px;
+        }
+        
+        th {
+            font-size: calc(2rem + 1vw);
+        }
+
         .playlist-header > .labels {
             cursor: default;
         }
-    }
 
-    /* .playlist-name th:hover {
-        color: #009e73;
-        cursor: pointer;
-    } */
+        .playlist-name th:hover {
+            cursor: pointer;
+            color: var(--main-green);
+        }
 
-    /* .playlist-name th:hover::after {
-        content: " >";
-        color: #009e73;
-    }
+        .has-selected-child .playlist-name th:hover {
+            color: var(--secondary-color);
+        }
+        
+        .playlist-name th span:hover::after {
+            content: " >";
+            color: var(--main-green);
+        }
 
-    .expanded th:hover::after {
-        content: " <";
-        color: #009e73;
-    }
+        .has-selected-child .playlist-name th span:hover::after {
+            color: var(--secondary-color);
+        }
 
-    .track:hover {
-        font-weight: bold;
-    }
+        .expanded th span:hover::after {
+            content: " <";
+        }
 
-    tr.track:not(.selected):hover {
-        background-color: #117733;
+        .track:hover td {
+            color: var(--main-green);
+            font-weight: bold;
+        }
+
+        tr.track.selected:hover td {
+            color: var(--secondary-color);
+        }
+
+        .action-button:hover {
+            font-weight: bold;
+            font-size: 1.5rem;
+        }
+
+        #transfer-pop-up li:hover {
+            color: var(--secondary-color);
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        #transfer-pop-up li.selected:hover {
+            color: var(--main-green);
+        }
     }
-    */
 }
 
 
