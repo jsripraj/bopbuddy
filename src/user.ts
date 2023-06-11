@@ -1,4 +1,5 @@
 export const clientId = "d5b13668505c44878407cf937854a906"; 
+export const redirectUri = "https://jsripraj.github.io/spotifybuddy/";
 export const params = new URLSearchParams(window.location.search);
 export const code = params.get("code");
 
@@ -11,7 +12,7 @@ export async function redirectToAuthCodeFlow(clientId: string) {
     const params = new URLSearchParams();
     params.append("client_id", clientId);
     params.append("response_type", "code");
-    params.append("redirect_uri", "http://localhost:5173/callback");
+    params.append("redirect_uri", redirectUri);
     params.append("scope", "user-read-private user-read-email playlist-modify-private playlist-modify-public");
     params.append("code_challenge_method", "S256");
     params.append("code_challenge", challenge);
