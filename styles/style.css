@@ -1,5 +1,4 @@
-/* This stylesheet attempts to be colorblind-accessible by using 
-colors from the Wong color palette. 
+/* The color scheme in this stylesheet attempts to be colorblind-accessible.
 Source: davidmathlogic.com/colorblind */
 
 @layer base-mobile, desktop, hover, global;
@@ -73,10 +72,10 @@ Source: davidmathlogic.com/colorblind */
         display: none;
     }
 
+
     /* Button click animation */
 
-    .action-button:active,
-    dialog button:active {
+    .action-button:active {
         transform: scale(0.95);
     }
 
@@ -86,7 +85,6 @@ Source: davidmathlogic.com/colorblind */
         transform: scale(0.99);
     }
     .action-button:active,
-    dialog button:active,
     .track:active,
     .playlist-name th:active,
     #transfer-pop-up li:active {
@@ -175,7 +173,6 @@ Source: davidmathlogic.com/colorblind */
     table {
         table-layout: fixed;
         width: 100%;
-        cursor: pointer;
     }
 
     table * {

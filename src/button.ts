@@ -257,7 +257,6 @@ export function toggleExpandPlaylist(pl: SimplifiedPlaylist): void {
 }
 
 async function transferSongs(token: string, playlists: SimplifiedPlaylist[], dest: number): Promise<void> {
-    console.log("called TransferSong");
     toggleLoading();
     const selectedTracks = document.getElementsByClassName('selected');
     let uris = [];
@@ -278,8 +277,6 @@ async function transferSongs(token: string, playlists: SimplifiedPlaylist[], des
 async function deleteSongs(token: string, playlists: SimplifiedPlaylist[]): Promise<void> {
     const selected = document.getElementsByClassName('selected');
     if (!selected.length) { return; }
-
-    console.log(`called deleteSongs`);
 
     toggleLoading();
     let [pOld, _] = getIndices(selected[0] as HTMLElement);
@@ -401,7 +398,6 @@ async function refresh(token: string, pls: SimplifiedPlaylist[], targetInds: num
     /* targetInds holds the indices of the playlists to operate on.
     If not passed, default to operating on every playlist. */
     for (let ind of targetInds) {
-        console.log(`refreshing ${pls[ind].name}`);
         const plDiv = document.getElementById(`PL${ind}`);
 
         // Delete all tracks

@@ -21,7 +21,6 @@ export async function fetchPlaylists(token: string): Promise<SimplifiedPlaylist[
 }
 
 export async function fetchTracks(token: string, pl: SimplifiedPlaylist): Promise<void> {
-    // console.log(`called fetchTracks on PL${pl.index}`);
     pl.tracks = [];
     let offset = 0;
     while (true) {
@@ -80,7 +79,6 @@ export function populatePlaylists(token: string, playlists: SimplifiedPlaylist[]
 }
 
 export function populateTracks(pl: SimplifiedPlaylist): void {
-    console.log(`populating PL${pl.index}`);
     const plDiv = document.getElementById(`PL${pl.index}`);
     const labelRow = plDiv?.firstElementChild?.getElementsByClassName("labels")[0];
     const headerDiv = plDiv?.firstElementChild;
@@ -181,9 +179,7 @@ function setPlaylistClickHandler(token: string, playlists: SimplifiedPlaylist[])
         let tr = headerDiv?.firstElementChild;
         tr?.addEventListener("click", async function () {
             if (loading()) { return; }
-            console.log(playlists[i].name + " click event");
             toggleLoading();
-            // console.log(`populated = ${playlists[i].populated}`);
             if (playlists[i].populated) {
                 toggleExpandPlaylist(playlists[i]);
             } else {
@@ -206,14 +202,9 @@ export async function sendAddRequest(token: string, dest: SimplifiedPlaylist, ur
         body: JSON.stringify({
             'uris': uris
         })
-    }).then(
-        async (val) => {
-           console.log(await val.json());
-        }, 
-        async (err) => {
-            console.error(await err.json());
-        });
-
+    }).catch(async (error) => {
+        console.error(await error.json());
+    });
     return;
 }
 
@@ -227,14 +218,9 @@ export async function sendDeleteRequest(token: string, pls: SimplifiedPlaylist[]
         body: JSON.stringify({
             "tracks": uris
         })
-    }).then(
-        async (val) => {
-            console.log(await val.json());
-        },
-        async (err) => {
-            console.error(await err.json());
-        }
-    )
+    }).catch(async (error) => {
+        console.error(await error.json());
+    });
     return;
 }
 
