@@ -1,6 +1,5 @@
 export const clientId = "d5b13668505c44878407cf937854a906"; 
-// export const redirectUri = "https://jsripraj.github.io/spotifybuddy";
-export const redirectUri = "http://localhost:5173/callback";
+export const redirectUri = "https://jsripraj.github.io/spotifybuddy";
 export const params = new URLSearchParams(window.location.search);
 export const code = params.get("code");
 export const reloaded = pageAccessedByReload();
