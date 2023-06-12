@@ -5,16 +5,26 @@ export async function fetchPlaylists(token: string): Promise<SimplifiedPlaylist[
     let playlists: SimplifiedPlaylist[] = [];
     let offset = 0;
     let result;
-    let rj;
+    let res;
     while (true) {
-        result = await fetch(`https://api.spotify.com/v1/me/playlists?limit=${limit}&offset=${offset}`, {
-            method: "GET", headers: { Authorization: `Bearer ${token}` }
-        });
-        rj = await result.json();
-        if (rj.items.length === 0) {
+        try {
+            result = await fetch(`https://api.spotify.com/v1/me/playlists?limit=${limit}&offset=${offset}`, {
+                method: "GET", headers: { Authorization: `Bearer ${token}` }
+            });
+            if (!result) {
+                throw new Error(`Fetch playlists return value evaluates to undefined: ${result}`);
+            }
+            res = await result.json();
+            if (!res) {
+                throw new Error(`While fetching playlists, Response could not be parsed as JSON`)
+            }
+        } catch (e) {
+            console.error(e);
+        }
+        if (res.items.length === 0) {
             return playlists;
         } else {
-            playlists = playlists.concat(rj.items);
+            playlists = playlists.concat(res.items);
             offset += limit;
         }
     } 
@@ -204,6 +214,8 @@ export async function sendAddRequest(token: string, dest: SimplifiedPlaylist, ur
         })
     }).catch(async (error) => {
         console.error(await error.json());
+    }).catch(err => {
+        console.error(err);
     });
     return;
 }
