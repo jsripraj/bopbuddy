@@ -4,11 +4,10 @@ export async function fetchPlaylists(token: string): Promise<SimplifiedPlaylist[
     const limit = 10;
     let playlists: SimplifiedPlaylist[] = [];
     let offset = 0;
-    let result;
     let res;
     while (true) {
         try {
-            result = await fetch(`https://api.spotify.com/v1/me/playlists?limit=${limit}&offset=${offset}`, {
+            let result = await fetch(`https://api.spotify.com/v1/me/playlists?limit=${limit}&offset=${offset}`, {
                 method: "GET", headers: { Authorization: `Bearer ${token}` }
             });
             if (!result) {
@@ -20,6 +19,7 @@ export async function fetchPlaylists(token: string): Promise<SimplifiedPlaylist[
             }
         } catch (e) {
             console.error(e);
+            return playlists;
         }
         if (res.items.length === 0) {
             return playlists;
@@ -33,12 +33,24 @@ export async function fetchPlaylists(token: string): Promise<SimplifiedPlaylist[
 export async function fetchTracks(token: string, pl: SimplifiedPlaylist): Promise<void> {
     pl.tracks = [];
     let offset = 0;
+    let result;
     while (true) {
-        let res = await fetch(`https://api.spotify.com/v1/playlists/${pl.id}/tracks?offset=${offset}`, {
-            method: "GET", 
-            headers: { Authorization: `Bearer ${token}`},
-        });
-        let result = await res.json();
+        try {
+            let res = await fetch(`https://api.spotify.com/v1/playlists/${pl.id}/tracks?offset=${offset}`, {
+                method: "GET", 
+                headers: { Authorization: `Bearer ${token}`},
+            });
+            if (!res) {
+                throw new Error(`Fetch playlists returned undefined value: ${res}`);
+            }
+            result = await res.json();
+            if (!result) {
+                throw new Error(`While fetching tracks, parsing Response as JSON returned undefined value`);
+            }
+        } catch(e) {
+            console.error(e);
+            return
+        }
         if (result.items.length === 0 ) {
             return;
         } else {
@@ -90,6 +102,10 @@ export function populatePlaylists(token: string, playlists: SimplifiedPlaylist[]
 
 export function populateTracks(pl: SimplifiedPlaylist): void {
     const plDiv = document.getElementById(`PL${pl.index}`);
+    if (!plDiv) {
+        console.error(`populateTracks unable to get HTML element by id: PL${pl.index}`);
+        return;
+    }
     const labelRow = plDiv?.firstElementChild?.getElementsByClassName("labels")[0];
     const headerDiv = plDiv?.firstElementChild;
     if (pl.tracks.length) {
@@ -232,6 +248,8 @@ export async function sendDeleteRequest(token: string, pls: SimplifiedPlaylist[]
         })
     }).catch(async (error) => {
         console.error(await error.json());
+    }).catch(err => {
+        console.error(err);
     });
     return;
 }

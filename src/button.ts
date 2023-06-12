@@ -1,14 +1,11 @@
 import {
-    sendAddRequest, sendDeleteRequest, fetchTracks, populateTracks, markSelected, unmarkSelected
+    sendAddRequest, sendDeleteRequest, fetchTracks, populateTracks, unmarkSelected
 } from "./spotify.ts";
 
 export function setUpButtons(token: string, playlists: SimplifiedPlaylist[]): void {
     setUpTransferButton(token, playlists);
     setUpDeleteButton(token, playlists);
-    setUpSelectAllBtn(token, playlists);
     setUpUnselectAllBtn(playlists);
-    setUpExpandAllBtn(token, playlists);
-    setUpCollapseAllBtn(playlists);
 }
 
 function setUpTransferButton(token: string, playlists: SimplifiedPlaylist[]): void {
@@ -130,6 +127,7 @@ function setUpDeleteButton(token: string, playlists: SimplifiedPlaylist[]): void
     });
 }
 
+/*
 function setUpSelectAllBtn(token: string, pls: SimplifiedPlaylist[]): void {
     const selectAllBtn = document.getElementById("selectAllBtn");
     selectAllBtn?.addEventListener('click', async () => {
@@ -149,6 +147,7 @@ function setUpSelectAllBtn(token: string, pls: SimplifiedPlaylist[]): void {
     });
     return;
 }
+*/
 
 function setUpUnselectAllBtn(pls: SimplifiedPlaylist[]): void {
     const selectAllBtn = document.getElementById("unselectAllBtn");
@@ -167,6 +166,7 @@ function setUpUnselectAllBtn(pls: SimplifiedPlaylist[]): void {
     return;
 }
 
+/*
 function setUpExpandAllBtn(token: string, pls: SimplifiedPlaylist[]): void {
     const expandAllBtn = document.getElementById("expandAllBtn");
     expandAllBtn?.addEventListener('click', async () => {
@@ -213,6 +213,7 @@ function collapsePlaylists(playlists: SimplifiedPlaylist[]): void {
     }
     return;
 }
+*/
 
 export function toggleExpandPlaylist(pl: SimplifiedPlaylist): void {
     const plDiv = document.getElementById(`PL${pl.index}`);
