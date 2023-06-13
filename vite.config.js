@@ -1,5 +1,5 @@
 export default {
-    base: '/spotifybuddy/',
+    base: '/bopbuddy/',
     build: {
         target: 'esnext',
     },
