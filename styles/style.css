@@ -6,8 +6,8 @@ Source: davidmathlogic.com/colorblind */
 @layer base-mobile {
 
     :root {
-        --main-green: #009e73;
-        --background-green: #117733;
+        --main-color: #56b4e9;
+        --main-color-background: #0072b2;
         --secondary-color: #e69f00;
         --secondary-color-mobile: rgba(230,159,0,0.3);
     }
@@ -31,7 +31,7 @@ Source: davidmathlogic.com/colorblind */
     }
 
     #header > h1 > span {
-        color: var(--main-green);
+        color: var(--main-color);
     }
 
     #header > p {
@@ -52,7 +52,7 @@ Source: davidmathlogic.com/colorblind */
         width: 100%;
         position: fixed;
         bottom: 0px;
-        background-color:var(--background-green);
+        background-color:var(--main-color-background);
         height: calc(45px + 2vh);
         z-index: 5;
     }
@@ -128,7 +128,7 @@ Source: davidmathlogic.com/colorblind */
     }
 
     #transfer-pop-up h2 > span:last-child {
-        color: var(--main-green);
+        color: var(--main-color);
         font-weight: bold;
     }
 
@@ -147,7 +147,7 @@ Source: davidmathlogic.com/colorblind */
     }
 
     #transfer-pop-up .selected {
-        background-color: var(--background-green);
+        background-color: var(--main-color-background);
     }
 
     #delete-pop-up .button-bar {
@@ -197,7 +197,7 @@ Source: davidmathlogic.com/colorblind */
     }
 
     .expanded .playlist-header {
-        color:var(--main-green);
+        color:var(--main-color);
     }
 
     .playlist-header td {
@@ -250,7 +250,7 @@ Source: davidmathlogic.com/colorblind */
         }
 
         .expanded .playlist-header {
-            color:var(--main-green);
+            color:var(--main-color);
         }
 
         .expanded .playlist-header td {
@@ -288,7 +288,7 @@ Source: davidmathlogic.com/colorblind */
         }
 
         li.selected {
-            color:var(--main-green);
+            color:var(--main-color);
             font-weight: 900;
         }
 
@@ -338,7 +338,7 @@ Source: davidmathlogic.com/colorblind */
 
         .playlist-name th:hover {
             cursor: pointer;
-            color: var(--main-green);
+            color: var(--main-color);
         }
 
         .has-selected-child .playlist-name th:hover {
@@ -347,7 +347,7 @@ Source: davidmathlogic.com/colorblind */
         
         .playlist-name th span:hover::after {
             content: " >";
-            color: var(--main-green);
+            color: var(--main-color);
         }
 
         .has-selected-child .playlist-name th span:hover::after {
@@ -359,7 +359,7 @@ Source: davidmathlogic.com/colorblind */
         }
 
         .track:hover td {
-            color: var(--main-green);
+            color: var(--main-color);
             font-weight: bold;
         }
 
@@ -379,7 +379,7 @@ Source: davidmathlogic.com/colorblind */
         }
 
         #transfer-pop-up li.selected:hover {
-            color: var(--main-green);
+            color: var(--main-color);
         }
     }
 }
@@ -410,7 +410,7 @@ Source: davidmathlogic.com/colorblind */
         position: fixed;
         top: 40%;
         z-index: 20;
-        border: 15px solid var(--main-green);
+        border: 15px solid var(--main-color);
         border-top: 15px solid var(--secondary-color);
         border-radius: 50%;
         width: 60px;
